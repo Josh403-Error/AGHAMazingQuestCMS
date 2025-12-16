@@ -415,13 +415,80 @@ body.login3-body-style { ... }
 /* Sidebar Styling */
 .sidebar {
     width: 280px; /* Wider sidebar */
-    background-color: #000000;
-    color: white;
+    background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+    color: #ecf0f1;
     padding: 20px 0;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
     position: relative; /* For footer positioning */
+    transition: all 0.3s ease;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 10px;
+}
+
+.sidebar-header span {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: #ecf0f1;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    flex-shrink: 0;
+}
+
+/* Sub-Menu Styling */
+.sub-menu {
+    list-style: none;
+    padding-left: 55px !important; /* Indent sub-items */
+    margin: 5px 0 10px 0;
+}
+
+.sub-menu li a {
+    transition: color 0.2s;
+    font-size: 0.9rem;
+}
+
+.sub-menu li a:hover {
+    color: #f1c40f !important; /* Yellow hover for sub-items */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+    
+    .sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+    }
 }
 
 .sidebar-header {

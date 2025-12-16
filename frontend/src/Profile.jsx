@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchAuth } from './api';
 
 export default function Profile({ onLogout }) {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -50,7 +52,23 @@ export default function Profile({ onLogout }) {
           <p><strong>Username:</strong> {user.username}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>First name:</strong> {user.first_name}</p>
-          <p><strong>Last name:</strong> {user.last_name}</p>
+          <p><strong>Last name:</strong> {user.last_name || 'Not set'}</p>
+          
+          <div style={{ marginTop: '20px' }}>
+            <button 
+              className="btn btn-primary" 
+              onClick={() => navigate('/dashboard/account')}
+            >
+              Account Settings
+            </button>
+            <button 
+              className="btn btn-secondary" 
+              onClick={onLogout}
+              style={{ marginLeft: '10px' }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       )}
       <div style={{ marginTop: 12 }}>

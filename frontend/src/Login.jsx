@@ -29,43 +29,67 @@ export default function Login({ onLogin }) {
           if (onLogin) {
             try { onLogin({ access: data.access, refresh: data.refresh }); } catch (e) { console.error('onLogin callback threw', e); }
           } else {
-            try { window.location.href = '/dashboard'; } catch (e) { console.error(e); }
+            window.location.href = '/dashboard';
           }
         }
       } else {
         const text = await res.text();
-        setError(`Expected JSON response but received HTML/text from server:\n${text.substring(0, 1000)}`);
+        console.error('Login failed with non-JSON response:', res.status, text);
+        setError(`HTTP ${res.status}: ${text.substring(0, 200)}${text.length > 200 ? '...' : ''}`);
       }
     } catch (err) {
-      console.error('Login request error', err);
-      setError(String(err));
+      console.error('Network error during login:', err);
+      setError(err.message || String(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <h3>Sign in</h3>
-      <form onSubmit={submit}>
-        <div style={{ marginBottom: 8 }}>
-          <label>Username</label>
-          <br />
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required />
+    <form onSubmit={submit} className="login-form">
+      {error && (
+        <div className="alert alert-error">
+          {error}
         </div>
-        <div style={{ marginBottom: 8 }}>
-          <label>Password</label>
-          <br />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        <div>
-          <button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
-        </div>
-      </form>
-      {error && <div style={{ color: 'crimson', marginTop: 8 }}>{error}</div>}
-      <div style={{ marginTop: 12, color: '#666' }}>
-        Tip: use an existing Django superuser or register via API at <code>/api/auth/register/</code>.
+      )}
+      
+      <div className="form-group">
+        <label htmlFor="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter your username"
+          required
+          disabled={loading}
+        />
       </div>
-    </div>
+      
+      <div className="form-group">
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+          required
+          disabled={loading}
+        />
+      </div>
+      
+      <button 
+        type="submit" 
+        className={`btn btn-primary ${loading ? 'loading' : ''}`}
+        disabled={loading}
+      >
+        {loading ? 'Signing in...' : 'Sign In'}
+      </button>
+      
+      <div className="login-footer">
+        <p>Use your administrator credentials to access the system</p>
+      </div>
+    </form>
   );
 }
