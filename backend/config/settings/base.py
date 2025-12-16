@@ -17,7 +17,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # `base.py` lives in `config/settings/`, so go up three levels to reach
-# the repository/project root (AGHAMazingQuestCMS).
+# the repository/project root (AGHAMazingQuestCMS/backend).
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
@@ -292,4 +292,3 @@ if not DEBUG:
 
     # Ensure DEBUG is False in production
     DEBUG = False
-
