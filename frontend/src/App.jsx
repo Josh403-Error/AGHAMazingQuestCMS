@@ -74,10 +74,6 @@ function LoginWrapper() {
   return (
     <div className="login-wrapper">
       <div className="login-container">
-        <div className="login-header">
-          <h1>AGHAMazing Quest CMS</h1>
-          <p>Sign in to access the content management system</p>
-        </div>
         <Login onLogin={(tokens) => {
           localStorage.setItem('access', tokens.access);
           localStorage.setItem('refresh', tokens.refresh);

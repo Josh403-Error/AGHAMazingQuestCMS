@@ -46,6 +46,27 @@ Run the setup script to automatically configure your development environment:
 ./scripts/setup_dev_env.sh
 ```
 
+## Startup Scripts
+
+The project includes convenient startup scripts:
+
+- `start_app.sh`: Starts both frontend and backend servers
+- `stop_app.sh`: Stops all running servers
+
+### Using the Startup Scripts
+
+To start the application:
+
+```bash
+./start_app.sh
+```
+
+To stop the application:
+
+```bash
+./stop_app.sh
+```
+
 ### Manual Setup
 
 #### Backend Setup

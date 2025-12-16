@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
@@ -47,6 +49,23 @@ export default function Login({ onLogin }) {
 
   return (
     <form onSubmit={submit} className="login-form">
+      <div className="login-header">
+        <div className="logo-container">
+          <img 
+            src="/apcseal.webp" 
+            alt="APC Seal" 
+            className="logo apc-logo"
+          />
+          <img 
+            src="/dost-stiilogo.jpg" 
+            alt="DOST-STII Logo" 
+            className="logo dost-logo"
+          />
+        </div>
+        <h1>AGHAMazing Quest CMS</h1>
+        <p>Sign in to access the content management system</p>
+      </div>
+      
       {error && (
         <div className="alert alert-error">
           {error}
@@ -88,7 +107,14 @@ export default function Login({ onLogin }) {
       </button>
       
       <div className="login-footer">
-        <p>Use your administrator credentials to access the system</p>
+        <button 
+          type="button" 
+          className="btn btn-link"
+          onClick={() => navigate('/forgot-password')}
+          disabled={loading}
+        >
+          Forgot Password?
+        </button>
       </div>
     </form>
   );
