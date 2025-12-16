@@ -1,6 +1,7 @@
 // src/Dashboard.jsx (The canonical Dashboard implementation)
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import { fetchAuth } from './api.js';

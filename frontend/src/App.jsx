@@ -3,18 +3,18 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './Login.jsx';
 import Dashboard from './Dashboard.jsx';
-import ContentManagementPage from './pages/ContentManagementPage.jsx';
-import UploadContentPage from './pages/UploadContentPage.jsx';
-import EditContentPage from './pages/EditContentPage.jsx';
-import ApproveContentPage from './pages/ApproveContentPage.jsx';
-import PublishContentPage from './pages/PublishContentPage.jsx';
-import DeleteContentPage from './pages/DeleteContentPage.jsx';
-import GenerateAnalyticsPage from './pages/GenerateAnalyticsPage.jsx';
-import ViewAnalyticsPage from './pages/ViewAnalyticsPage.jsx';
-import DownloadAnalyticsPage from './pages/DownloadAnalyticsPage.jsx';
-import AnalyticsManagementPage from './pages/AnalyticsManagementPage.jsx';
-import UserManagementPage from './pages/UserManagementPage.jsx';
-import RolesPage from './pages/RolesPage.jsx';
+import ContentManagementPage from './pages/ContentManagementPage.js';
+import UploadContentPage from './pages/UploadContentPages.js';
+import EditContentPage from './pages/EditContentPage.js';
+import ApproveContentPage from './pages/ApproveContentPage.js';
+import PublishContentPage from './pages/PublishContentPage.js';
+import DeleteContentPage from './pages/DeleteContentPage.js';
+import GenerateAnalyticsPage from './pages/GenerateAnalyticsPage.js';
+import ViewAnalyticsPage from './pages/ViewAnalyticsPage.js';
+import DownloadAnalyticsPage from './pages/DownloadAnalyticsPage.js';
+import AnalyticsManagementPage from './pages/AnalyticsManagementPage.js';
+import UserManagementPage from './pages/UserManagementPage.js';
+import RolesPage from './pages/RolesPage.js';
 
 function App() {
   return (
