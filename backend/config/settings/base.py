@@ -136,7 +136,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Support switching between sqlite, MySQL and PostgreSQL via environment variables.
 # DB_ENGINE: 'sqlite' | 'mysql' (default when DEBUG is False) | 'postgres'/'postgresql'
 # For local development (DEBUG=True) default to sqlite to avoid requiring a DB server.
-default_db = 'sqlite' if DEBUG else 'mysql'
+default_db = 'sqlite' if DEBUG else 'postgres'
 DB_ENGINE = os.environ.get('DB_ENGINE', default_db).lower()
 if DB_ENGINE == 'sqlite':
     engine = 'django.db.backends.sqlite3'
@@ -164,9 +164,9 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': engine,
-            'NAME': os.environ.get('DB_NAME', 'aghamazing_db'),
-            'USER': os.environ.get('DB_USER', 'agha_user'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'agha_password'),
+            'NAME': os.environ.get('DB_NAME', 'agha_db'),
+            'USER': os.environ.get('DB_USER', 'admin'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '3306' if engine.endswith('mysql') else '5432'),
             'OPTIONS': {

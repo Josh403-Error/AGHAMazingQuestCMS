@@ -7,7 +7,7 @@ WORKDIR /app
 
 # System deps for common Python packages (Pillow, psycopg2, etc.)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libpq-dev gcc curl \
+    && apt-get install -y --no-install-recommends build-essential libpq-dev postgresql-client gcc curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps

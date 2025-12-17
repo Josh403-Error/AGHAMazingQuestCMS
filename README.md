@@ -2,165 +2,66 @@
 
 A Content Management System for managing game content with workflow capabilities.
 
-## Project Structure
+## Features
 
-The project has been reorganized for better maintainability and separation of concerns:
+- Content creation, editing, approval, and publishing workflows
+- Role-based user management and permissions
+- Analytics dashboard for content performance tracking
+- Integration with Wagtail CMS for rich content editing
+- RESTful API for frontend integration
 
-```
-AGHAMazingQuestCMS/
-├── backend/                 # Django backend application
-│   ├── apps/               # Django applications
-│   │   ├── analyticsmanagement/
-│   │   ├── authentication/
-│   │   ├── contentmanagement/
-│   │   └── usermanagement/
-│   ├── config/             # Django project settings
-│   ├── media/              # User uploaded files
-│   ├── static/             # Static files
-│   ├── staticfiles/        # Collected static files
-│   ├── templates/          # Django templates
-│   ├── manage.py           # Django management script
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # React frontend application
-│   ├── public/             # Public assets
-│   └── src/                # Source code
-├── deployment/             # Deployment configurations
-│   ├── docker/             # Docker related files
-│   ├── deploy/             # Deployment configs (nginx, etc.)
-│   ├── Dockerfile          # Docker image definition
-│   └── docker-compose.yml  # Multi-container setup
-├── scripts/                # Utility scripts
-├── docs/                   # Documentation
-└── README.md               # Main project documentation
-```
+## Tech Stack
 
-See [docs/project_structure.md](docs/project_structure.md) for detailed information about the structure.
+- Frontend: React v19.2.0 with React Router v7.9.4
+- Backend: Python 3.11 with Django and Django REST Framework
+- CMS: Wagtail
+- Database: PostgreSQL with pgAdmin for administration
+- Deployment: Docker & Docker Compose
 
-## Setup Instructions
+## Prerequisites
 
-### Automated Setup
+- Docker and Docker Compose
+- Node.js v18+ (for local frontend development)
+- Python 3.11 (for local development)
 
-Run the setup script to automatically configure your development environment:
+## Getting Started
 
-```bash
-./scripts/setup_dev_env.sh
-```
-
-## PostgreSQL Setup
-
-This project supports PostgreSQL database with pgAdmin4 administration interface. 
-
-For detailed instructions on setting up PostgreSQL and pgAdmin4 with Docker, see [PostgreSQL and pgAdmin4 Setup Guide](docs/postgresql_pgadmin_setup.md).
-
-To quickly get started:
-
-1. Update your `.env` file to use PostgreSQL:
+1. Clone the repository:
    ```bash
-   DB_ENGINE=postgres
-   DB_NAME=aghamazing_db
-   DB_USER=agha_user
-   DB_PASSWORD=agha_password
-   DB_HOST=db
-   DB_PORT=5432
+   git clone <repository-url>
+   cd AGHAMazingQuestCMS
    ```
 
-2. From the `deployment` directory, start all services:
+2. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your configuration
+   ```
+
+3. Start all services:
    ```bash
    cd deployment
-   docker-compose up -d
+   docker-compose up --build
    ```
 
-3. Access pgAdmin4 at http://localhost:5050 with credentials:
-   - Email: admin@example.com
-   - Password: admin
+4. Access the services:
+   - Main Application: http://localhost
+   - pgAdmin: http://localhost:5050
+   - Direct Database Access: localhost:5433
 
-## Startup Scripts
+## Documentation
 
-The project includes convenient startup scripts:
+- [Running Instructions](RUNNING_INSTRUCTIONS.md)
+- [PostgreSQL and pgAdmin Setup](docs/postgresql_pgadmin_setup.md)
 
-- `start_app.sh`: Starts both frontend and backend servers
-- `stop_app.sh`: Stops all running servers
+## Project Structure
 
-### Using the Startup Scripts
+- `backend/`: Django backend application
+- `frontend/`: React frontend application
+- `deployment/`: Docker and Docker Compose configurations
+- `docs/`: Project documentation
+- `scripts/`: Utility scripts for development
 
-To start the application:
+## License
 
-```bash
-./start_app.sh
-```
-
-To stop the application:
-
-```bash
-./stop_app.sh
-```
-
-### Manual Setup
-
-#### Backend Setup
-
-1. Create a virtual environment:
-   ```
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-2. Install dependencies:
-   ```
-   cd backend
-   pip install -r requirements.txt
-   ```
-
-3. Set up environment variables (see `.env.example`)
-
-4. Run database migrations:
-   ```
-   python manage.py migrate
-   ```
-
-5. Create a superuser:
-   ```
-   python manage.py createsuperuser
-   ```
-
-6. Start the development server:
-   ```
-   python manage.py runserver
-   ```
-
-#### Frontend Setup
-
-1. Install Node.js (v18 or higher)
-
-2. Navigate to frontend directory:
-   ```
-   cd frontend
-   ```
-
-3. Install dependencies:
-   ```
-   npm install
-   ```
-
-4. Start the development server:
-   ```
-   npm start
-   ```
-
-## Deployment
-
-For production deployment, use Docker:
-
-```bash
-cd deployment
-docker-compose up --build
-```
-
-## API Endpoints
-
-- Admin: `/admin/`
-- API Authentication: `/api/auth/`
-- API Content Management: `/api/content/`
-- API User Management: `/api/users/`
-- API Analytics: `/api/analytics/`
-- Wagtail CMS: `/cms/`
+[MIT License](LICENSE)

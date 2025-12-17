@@ -1,120 +1,175 @@
-# PostgreSQL and pgAdmin4 Setup Guide
+# PostgreSQL and pgAdmin Setup Guide
 
-This document explains how to set up PostgreSQL database and pgAdmin4 administration tool using Docker Compose.
+This document describes how to set up and use PostgreSQL and pgAdmin with the AGHAMazingQuestCMS project.
+
+## Overview
+
+The project now includes PostgreSQL database and pgAdmin administration tool as part of its Docker Compose setup. This guide explains how to configure and use these services.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed
-- Basic understanding of Docker concepts
+Ensure you have Docker and Docker Compose installed on your system.
 
-## Services Overview
+## Configuration
 
-The Docker Compose configuration includes:
+### Environment Variables
 
-1. **PostgreSQL Database** (version 15)
-   - Port mapping: 5433 (host) -> 5432 (container)
-   - Database name: `aghamazing_db`
-   - User: `agha_user`
-   - Password: `agha_password`
+Copy the `.env.example` file to `.env` and adjust the values as needed:
 
-2. **pgAdmin4**
-   - Port mapping: 5050 (host) -> 80 (container)
-   - Default login: admin@example.com / admin
+```bash
+cp .env.example .env
+```
+
+Key environment variables for PostgreSQL and pgAdmin:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_ENGINE` | Database engine | postgres |
+| `DB_NAME` | Database name | agha_db |
+| `DB_USER` | Database user | admin |
+| `DB_PASSWORD` | Database password | changeme |
+| `DB_HOST` | Database host | db |
+| `DB_PORT` | Database port | 5432 |
+| `PGADMIN_DEFAULT_EMAIL` | pgAdmin login email | admin@example.com |
+| `PGADMIN_DEFAULT_PASSWORD` | pgAdmin login password | supersecretpassword |
+
+### Docker Compose Services
+
+The following services are defined in `deployment/docker-compose.yml`:
+
+1. **db**: PostgreSQL database server (port 5433 on host)
+2. **pgadmin**: pgAdmin web interface (port 5050 on host)
+3. **web**: Django application
+4. **nginx**: Reverse proxy
 
 ## Starting the Services
 
-To start PostgreSQL and pgAdmin4:
+From the `deployment` directory, run:
 
 ```bash
-cd deployment/
-sudo docker-compose up -d
+docker-compose up --build
 ```
+
+On first run, this will:
+1. Create the PostgreSQL database with the specified credentials
+2. Start pgAdmin with the specified admin credentials
+3. Build and start the Django application
+4. Configure nginx as a reverse proxy
 
 ## Accessing Services
 
-### PostgreSQL Database
+After starting the services:
 
-Connect to PostgreSQL using any PostgreSQL client:
+1. **Application**: http://localhost
+2. **pgAdmin**: http://localhost:5050
+3. **Direct database access**: localhost:5433
 
-- Host: localhost
-- Port: 5433
-- Database: aghamazing_db
-- Username: agha_user
-- Password: agha_password
+## Using pgAdmin
 
-Example using psql command:
+1. Navigate to http://localhost:5050
+2. Log in with the credentials from your `.env` file:
+   - Email: `PGADMIN_DEFAULT_EMAIL`
+   - Password: `PGADMIN_DEFAULT_PASSWORD`
+3. Register a new server with these connection details:
+   - Host: `db` (when connecting from another container)
+   - Host: `localhost` (when connecting from host machine)
+   - Port: `5432`
+   - Database: Value from `DB_NAME`
+   - Username: Value from `DB_USER`
+   - Password: Value from `DB_PASSWORD`
+
+## Test User for Development
+
+A test user is automatically created when the application starts:
+- Username: `testuser`
+- Password: `testpassword123`
+- Email: `testuser@example.com`
+
+This user is intended for development and testing purposes only. Do not use these credentials in production.
+
+To create additional test users, you can use the script:
 ```bash
-psql -h localhost -p 5433 -U agha_user -d aghamazing_db
+cd scripts
+python create_test_user.py
 ```
 
-### pgAdmin4
-
-Access pgAdmin4 through your web browser:
-
-- URL: http://localhost:5050
-- Email: admin@example.com
-- Password: admin
-
-## Configuring pgAdmin4 to Connect to PostgreSQL
-
-After logging into pgAdmin4:
-
-1. Click "Add New Server"
-2. In the "General" tab:
-   - Name: AghamazingQuestCMS
-3. In the "Connection" tab:
-   - Host name/address: db (this is the service name in docker-compose)
-   - Port: 5432
-   - Maintenance database: aghamazing_db
-   - Username: agha_user
-   - Password: agha_password
-   - Save password: Yes
-4. Click "Save"
-
-## Stopping the Services
-
-To stop the services:
-
+Or customize the creation by passing arguments:
 ```bash
-cd deployment/
-sudo docker-compose down
+cd scripts
+python create_test_user.py --username mytestuser --password mypassword
 ```
+
+## Connecting to PostgreSQL from Django
+
+The Django application automatically connects to PostgreSQL using the environment variables. The connection is configured in `backend/config/settings/base.py`.
+
+Make sure these environment variables are set correctly:
+- `DB_ENGINE=postgres`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST=db` (this is the service name in docker-compose)
+- `DB_PORT=5432`
 
 ## Troubleshooting
 
-### Common Issues
+### Connection Issues
 
-1. **Port already in use**: Change the port mappings in `docker-compose.yml`
-2. **Permission denied**: Make sure you're running docker commands with sudo or add your user to the docker group
-3. **Connection refused**: Check that the services are running with `docker-compose ps`
+1. Ensure all services are running:
+   ```bash
+   docker-compose ps
+   ```
 
-### Checking Service Status
+2. Check logs for specific services:
+   ```bash
+   docker-compose logs db
+   docker-compose logs web
+   ```
+
+### Migration Problems
+
+If you encounter migration issues after switching to PostgreSQL:
+
+1. Ensure the database is clean (especially on first setup):
+   ```bash
+   docker-compose down -v
+   docker-compose up --build
+   ```
+
+2. Manually run migrations:
+   ```bash
+   docker-compose exec web python manage.py migrate
+   ```
+
+### Permission Errors
+
+If you experience permission errors with PostgreSQL data:
+
+1. Check volume permissions:
+   ```bash
+   docker-compose down -v
+   docker volume ls  # Look for aghamazingquestcms_postgres_data
+   docker volume rm [volume_name]
+   ```
+
+## Security Considerations
+
+1. Change default passwords in production environments
+2. Use strong, unique passwords for all services
+3. Restrict access to pgAdmin port (5050) in production
+4. Consider using SSL/TLS for database connections
+5. Regularly update Docker images
+
+## Backups
+
+To backup the database:
 
 ```bash
-cd deployment/
-sudo docker-compose ps
+docker-compose exec db pg_dump -U $DB_USER $DB_NAME > backup.sql
 ```
 
-### Viewing Logs
+To restore from a backup:
 
 ```bash
-cd deployment/
-sudo docker-compose logs [service_name]
+docker-compose exec -T db psql -U $DB_USER $DB_NAME < backup.sql
 ```
-
-Replace `[service_name]` with `db` for PostgreSQL or `pgadmin` for pgAdmin4.
-
-## Integration with Django Application
-
-The Django application is configured to use PostgreSQL when the following environment variables are set:
-
-```bash
-DB_ENGINE=postgres
-DB_NAME=aghamazing_db
-DB_USER=agha_user
-DB_PASSWORD=agha_password
-DB_HOST=db
-DB_PORT=5432
-```
-
-When running with Docker Compose, these variables are automatically used by the web service.

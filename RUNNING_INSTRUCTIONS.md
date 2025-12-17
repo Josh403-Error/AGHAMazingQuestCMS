@@ -1,173 +1,162 @@
-# How to Run the AGHAMazing Quest CMS Application
+# Running AGHAMazing Quest CMS
 
-This document provides step-by-step instructions to run the complete AGHAMazing Quest CMS application, which includes both the frontend and backend servers.
+Instructions for setting up and running the AGHAMazing Quest CMS application.
 
 ## Prerequisites
 
-Before running the application, ensure you have:
-- Python 3.12+
-- Node.js 14+
-- npm 6+
+- Docker and Docker Compose
+- Node.js v18+ (for local frontend development)
+- Python 3.11 (for local development)
 
-## Step-by-Step Instructions
+## Quick Start with Docker (Recommended)
 
-### 1. Activate the Virtual Environment and Install Dependencies
+1. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your configuration
+   ```
 
-```bash
-# Navigate to the project root directory
-cd /home/apcadmin/Documents/AGHAMazingQuestCMS
+2. Start all services:
+   ```bash
+   cd deployment
+   docker-compose up --build
+   ```
 
-# Activate the virtual environment
-source venv/bin/activate
+3. Access the services:
+   - Main Application: http://localhost
+   - pgAdmin: http://localhost:5050
+   - Direct Database Access: localhost:5433
 
-# Install/update Python dependencies (if needed)
-pip install -r requirements.txt
-```
+## Environment Configuration
 
-### 2. Install Frontend Dependencies
-
-```bash
-# Navigate to the frontend directory
-cd frontend
-
-# Install Node.js dependencies
-npm install
-
-# Navigate back to the project root
-cd ..
-```
-
-### 3. Set Environment Variables
-
-The application requires specific environment variables. These are stored in the `.env` file:
+Before starting the application, make sure to copy `.env.example` to `.env` and adjust the values as needed:
 
 ```bash
-# Check that the .env file exists and contains the necessary variables
-cat .env
+cp .env.example .env
 ```
 
-The file should contain:
-```
-DJANGO_SECRET_KEY=django-insecure-8i)k0@hetowp(8-+g6e222ejlkvdr44#8*7dg)f0m10m4*e63l
-DJANGO_DEBUG=True
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-DB_ENGINE=sqlite
-```
+Key environment variables:
 
-### 4. Start the Backend Server
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DJANGO_SECRET_KEY` | Secret key for Django | change-me |
+| `DJANGO_DEBUG` | Debug mode | False |
+| `DJANGO_ALLOWED_HOSTS` | Allowed hosts | localhost,127.0.0.1,... |
+| `DB_ENGINE` | Database engine | postgres |
+| `DB_NAME` | Database name | agha_db |
+| `DB_USER` | Database user | admin |
+| `DB_PASSWORD` | Database password | changeme |
+| `DB_HOST` | Database host | db |
+| `DB_PORT` | Database port | 5432 |
+| `PGADMIN_DEFAULT_EMAIL` | pgAdmin login email | admin@example.com |
+| `PGADMIN_DEFAULT_PASSWORD` | pgAdmin login password | supersecretpassword |
 
-```bash
-# Make sure you're in the project root directory
-cd /home/apcadmin/Documents/AGHAMazingQuestCMS
+## Database Setup with PostgreSQL
 
-# Export environment variables
-export $(cat .env | xargs)
+The application is configured to use PostgreSQL as the primary database. The Docker Compose setup includes:
 
-# Navigate to the backend directory
-cd backend
+1. A PostgreSQL database server (postgres:15)
+2. pgAdmin4 for database administration
+3. Automatic connection between Django and PostgreSQL
 
-# Start the Django development server
-python manage.py runserver 0.0.0.0:8000
-```
+### Initial Database Setup
 
-The backend server will be accessible at: http://localhost:8000
+When starting the application for the first time:
 
-### 5. Start the Frontend Server
+1. The database will be created with the specified credentials
+2. Django migrations will be automatically applied
+3. Static files will be collected
 
-Open a new terminal window/tab and run:
+### Using pgAdmin
 
-```bash
-# Navigate to the frontend directory
-cd /home/apcadmin/Documents/AGHAMazingQuestCMS/frontend
+1. Navigate to http://localhost:5050
+2. Log in with the credentials from your `.env` file
+3. Register a new server with these connection details:
+   - Host: `db` (when connecting from another container)
+   - Host: `localhost` (when connecting from host machine)
+   - Port: `5432`
+   - Database: Value from `DB_NAME`
+   - Username: Value from `DB_USER`
+   - Password: Value from `DB_PASSWORD`
 
-# Start the React development server
-npm start
-```
+## Local Development Setup (Without Docker)
 
-The frontend server will automatically open your browser at: http://localhost:3000
+### Backend Setup
 
-### 6. Access the Application
+1. Create a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-1. Open your browser and go to http://localhost:3000
-2. You'll see the login page with the APC and DOST-STII logos
-3. Use one of the following credentials to log in:
-   - Username: `superuser`, Password: `password123`
-   - Username: [admin](file:///home/apcadmin/Documents/AGHAMazingQuestCMS/apps/usermanagement/admin.py#L0-L0), Password: `password123`
-   - Username: `newuser`, Password: `password123`
+2. Install dependencies:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-### 7. Navigate the Application
+3. Set up environment variables (see `.env.example`)
 
-After logging in, you'll be directed to the dashboard where you can:
-- Manage content through the "Content Management" section
-- View and generate analytics reports
-- Manage users (if you have admin privileges)
-- Update your account settings
+4. Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. Create a superuser:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+6. Collect static files:
+   ```bash
+   python manage.py collectstatic
+   ```
+
+7. Start the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+### Frontend Setup
+
+1. Install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm start
+   ```
+
+## Production Deployment
+
+For production deployment, ensure:
+
+1. Strong, unique secrets for `DJANGO_SECRET_KEY`
+2. `DJANGO_DEBUG` is set to `False`
+3. Proper database backups are configured
+4. HTTPS is enabled
+5. Access to pgAdmin port (5050) is restricted
 
 ## Troubleshooting
 
-### If Port Conflicts Occur
+See our dedicated [PostgreSQL Troubleshooting Guide](docs/troubleshooting_postgresql.md) for solutions to common issues.
 
-If you see an error that ports 3000 or 8000 are already in use:
+See [PostgreSQL and pgAdmin Setup](docs/postgresql_pgadmin_setup.md) for more detailed information.
 
-```bash
-# Kill processes using port 3000 (frontend)
-sudo fuser -k 3000/tcp
+## Backup and Restore
 
-# Kill processes using port 8000 (backend)
-sudo fuser -k 8000/tcp
-```
-
-Alternatively, you can find and kill specific processes:
+### Database Backup
 
 ```bash
-# Find processes using port 8000
-lsof -i :8000
-
-# Kill the process (replace PID with actual process ID)
-kill PID
+docker-compose exec db pg_dump -U $DB_USER $DB_NAME > backup.sql
 ```
 
-### If Authentication Fails
-
-If you encounter authentication issues:
-
-1. Verify that the backend server is running properly
-2. Check that you're using the correct credentials
-3. Confirm that the user accounts exist by accessing the Django shell:
+### Database Restore
 
 ```bash
-cd /home/apcadmin/Documents/AGHAMazingQuestCMS
-export $(cat .env | xargs)
-cd backend
-python manage.py shell
+docker-compose exec -T db psql -U $DB_USER $DB_NAME < backup.sql
 ```
 
-Then in the shell:
-```python
-from django.contrib.auth import get_user_model
-User = get_user_model()
-users = User.objects.all()
-for user in users:
-    print(f"Username: {user.username}, Active: {user.is_active}")
-```
-
-### Restarting the Application
-
-To restart the application:
-
-1. Stop both servers (Ctrl+C in each terminal)
-2. Follow steps 4 and 5 above to restart the servers
-
-## Stopping the Application
-
-To stop the application:
-
-1. In the terminal running the frontend server, press Ctrl+C
-2. In the terminal running the backend server, press Ctrl+C
-
-## Additional Information
-
-- The application uses JWT for authentication
-- All API endpoints are prefixed with `/api/`
-- The frontend communicates with the backend through RESTful APIs
-- User data is stored in a SQLite database by default
