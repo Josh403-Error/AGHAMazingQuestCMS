@@ -7,6 +7,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const token = localStorage.getItem('access');
 
@@ -16,6 +17,15 @@ export default function UserManagementPage() {
     setLoading(true);
     setError(null);
     try {
+      // Fetch current user info
+      const currentUserRes = await fetch('/api/auth/me/', { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      if (currentUserRes.ok) {
+        const currentUserData = await currentUserRes.json();
+        setCurrentUser(currentUserData);
+      }
+
       const uRes = await fetch('/api/users/', { headers: { Authorization: `Bearer ${token}` } });
       if (uRes.status === 401) {
         // not authenticated
@@ -32,13 +42,13 @@ export default function UserManagementPage() {
       const uData = await uRes.json();
       setUsers(uData);
 
-  const gRes = await fetch('/api/users/roles/', { headers: { Authorization: `Bearer ${token}` } });
+      const gRes = await fetch('/api/users/roles/', { headers: { Authorization: `Bearer ${token}` } });
       if (!gRes.ok) {
         const text = await gRes.text();
         throw new Error(`Failed to load roles: ${gRes.status} ${text}`);
       }
-  const gData = await gRes.json();
-  setRoles(gData);
+      const gData = await gRes.json();
+      setRoles(gData);
     } catch (err) {
       console.error(err);
       setError(String(err));
@@ -50,7 +60,7 @@ export default function UserManagementPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const doDelete = async (id) => {
-    if (!window.confirm('Delete this user?')) return;
+    if (!window.confirm('Delete this user? This action cannot be undone.')) return;
     try {
       const res = await fetch(`/api/users/${id}/`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (![204,200].includes(res.status)) throw new Error('Delete failed');
@@ -58,42 +68,103 @@ export default function UserManagementPage() {
     } catch (err) { console.error(err); alert(String(err)); }
   };
 
-  return (
-    <div>
-      <h2>User Management</h2>
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => { setShowCreate(true); setEditing(null); }}>New user</button>
-      </div>
+  // Check if current user is a superuser
+  const isSuperuser = currentUser?.is_superuser;
 
-      {loading ? <div>Loading...</div> : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr><th style={{ textAlign: 'left', padding: 8 }}>Username</th><th style={{ padding: 8 }}>Email</th><th style={{ padding: 8 }}>Roles</th><th style={{ padding: 8 }}>Actions</th></tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id} style={{ borderTop: '1px solid #ddd' }}>
-                <td style={{ padding: 8 }}>{u.username}</td>
-                <td style={{ padding: 8 }}>{u.email}</td>
-                <td style={{ padding: 8 }}>{(u.roles || []).join(', ')}</td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => setEditing(u)}>Edit</button>{' '}
-                  <button onClick={() => doDelete(u.id)}>Delete</button>
-                </td>
+  return (
+    <div className="user-management-page">
+      <div className="page-header">
+        <h2>User Management</h2>
+        <p>Manage users and their roles within the system</p>
+      </div>
+      
+      {isSuperuser && (
+        <div className="action-bar">
+          <button className="btn btn-primary" onClick={() => { setShowCreate(true); setEditing(null); }}>
+            Create New User
+          </button>
+        </div>
+      )}
+      
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading users...</p>
+        </div>
+      ) : (
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id}>
+                  <td data-label="Username">{u.username}</td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="Name">{u.first_name} {u.last_name}</td>
+                  <td data-label="Roles">
+                    <div className="roles-container">
+                      {(u.roles || []).map((role, index) => (
+                        <span key={index} className="role-tag">{role}</span>
+                      ))}
+                    </div>
+                  </td>
+                  <td data-label="Status">
+                    <span className={`status-badge ${u.is_active ? 'active' : 'inactive'}`}>
+                      {u.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td data-label="Actions">
+                    <div className="action-buttons">
+                      <button className="btn btn-secondary" onClick={() => setEditing(u)}>Edit</button>
+                      {isSuperuser && (
+                        <button className="btn btn-danger" onClick={() => doDelete(u.id)}>Delete</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {users.length === 0 && (
+            <div className="empty-state">
+              <p>No users found</p>
+            </div>
+          )}
+        </div>
       )}
 
       {error && (
-        <div style={{ marginTop: 12, color: 'red' }}>
+        <div className="error-message">
           <strong>Error:</strong> {error}
         </div>
       )}
 
-  {showCreate && <UserForm roles={roles} onCancel={() => setShowCreate(false)} onSaved={() => { setShowCreate(false); fetchData(); }} />}
-  {editing && <UserForm user={editing} roles={roles} onCancel={() => setEditing(null)} onSaved={() => { setEditing(null); fetchData(); }} />}
+      {showCreate && isSuperuser && (
+        <UserForm 
+          roles={roles} 
+          onCancel={() => setShowCreate(false)} 
+          onSaved={() => { setShowCreate(false); fetchData(); }} 
+        />
+      )}
+      
+      {editing && (
+        <UserForm 
+          user={editing} 
+          roles={roles} 
+          onCancel={() => setEditing(null)} 
+          onSaved={() => { setEditing(null); fetchData(); }} 
+        />
+      )}
     </div>
   );
 }
