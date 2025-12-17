@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './parallax-login.css';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -38,54 +39,82 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-form">
-        <h2>Reset Password</h2>
-        <p>Enter your email address and we'll send you a link to reset your password.</p>
-        
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
-        
-        {message && (
-          <div className="alert alert-success">
-            {message}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              disabled={loading}
-            />
+    <div className="parallax-wrapper">
+      {/* Parallax background elements */}
+      <div className="parallax-layer parallax-back">
+        <div className="parallax-element element-1"></div>
+      </div>
+      <div className="parallax-layer parallax-base">
+        <div className="parallax-element element-2"></div>
+      </div>
+      <div className="parallax-layer parallax-front">
+        <div className="parallax-element element-3"></div>
+        <div className="parallax-element element-4"></div>
+      </div>
+      
+      <div className="parallax-container">
+        <div className="parallax-card">
+          <div className="parallax-header">
+            <div className="parallax-logo-container">
+              <img 
+                src="/apcseal.webp" 
+                alt="APC Seal" 
+                className="parallax-logo apc-logo"
+              />
+              <img 
+                src="/dost-stiilogo.jpg" 
+                alt="DOST-STII Logo" 
+                className="parallax-logo dost-logo"
+              />
+            </div>
+            <h2>Reset Password</h2>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
           </div>
           
-          <button 
-            type="submit" 
-            className={`btn btn-primary ${loading ? 'loading' : ''}`}
-            disabled={loading}
-          >
-            {loading ? 'Sending...' : 'Send Reset Link'}
-          </button>
-        </form>
-        
-        <div className="auth-links">
-          <button 
-            onClick={() => navigate('/')} 
-            className="btn btn-link"
-            disabled={loading}
-          >
-            Back to Login
-          </button>
+          {error && (
+            <div className="alert-error">
+              {error}
+            </div>
+          )}
+          
+          {message && (
+            <div className="alert-success">
+              {message}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="parallax-form">
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                disabled={loading}
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className={loading ? 'loading' : ''}
+              disabled={loading}
+            >
+              {loading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+          </form>
+          
+          <div className="parallax-footer">
+            <button 
+              onClick={() => navigate('/')} 
+              className="parallax-btn-link"
+              disabled={loading}
+            >
+              Back to Login
+            </button>
+          </div>
         </div>
       </div>
     </div>

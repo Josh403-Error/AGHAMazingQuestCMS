@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './parallax-login.css';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -48,74 +49,92 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <form onSubmit={submit} className="login-form">
-      <div className="login-header">
-        <div className="logo-container">
-          <img 
-            src="/apcseal.webp" 
-            alt="APC Seal" 
-            className="logo apc-logo"
-          />
-          <img 
-            src="/dost-stiilogo.jpg" 
-            alt="DOST-STII Logo" 
-            className="logo dost-logo"
-          />
-        </div>
-        <h1>AGHAMazing Quest CMS</h1>
-        <p>Sign in to access the content management system</p>
+    <div className="parallax-wrapper">
+      {/* Parallax background elements */}
+      <div className="parallax-layer parallax-back">
+        <div className="parallax-element element-1"></div>
+      </div>
+      <div className="parallax-layer parallax-base">
+        <div className="parallax-element element-2"></div>
+      </div>
+      <div className="parallax-layer parallax-front">
+        <div className="parallax-element element-3"></div>
+        <div className="parallax-element element-4"></div>
       </div>
       
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
-      
-      <div className="form-group">
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter your username"
-          required
-          disabled={loading}
-        />
+      <div className="parallax-container">
+        <form onSubmit={submit} className="parallax-form">
+          <div className="parallax-card">
+            <div className="parallax-header">
+              <div className="parallax-logo-container">
+                <img 
+                  src="/apcseal.webp" 
+                  alt="APC Seal" 
+                  className="parallax-logo apc-logo"
+                />
+                <img 
+                  src="/dost-stiilogo.jpg" 
+                  alt="DOST-STII Logo" 
+                  className="parallax-logo dost-logo"
+                />
+              </div>
+              <h1>AGHAMazing Quest CMS</h1>
+              <p>Sign in to access the content management system</p>
+            </div>
+            
+            {error && (
+              <div className="alert-error">
+                {error}
+              </div>
+            )}
+            
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+                required
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                disabled={loading}
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className={loading ? 'loading' : ''}
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+            
+            <div className="parallax-footer">
+              <button 
+                type="button" 
+                className="parallax-btn-link"
+                onClick={() => navigate('/forgot-password')}
+                disabled={loading}
+              >
+                Forgot Password?
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
-          required
-          disabled={loading}
-        />
-      </div>
-      
-      <button 
-        type="submit" 
-        className={`btn btn-primary ${loading ? 'loading' : ''}`}
-        disabled={loading}
-      >
-        {loading ? 'Signing in...' : 'Sign In'}
-      </button>
-      
-      <div className="login-footer">
-        <button 
-          type="button" 
-          className="btn btn-link"
-          onClick={() => navigate('/forgot-password')}
-          disabled={loading}
-        >
-          Forgot Password?
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }
