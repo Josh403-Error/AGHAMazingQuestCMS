@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.gis.db import models as gis_models
 from wagtail.models import Page
 from django.conf import settings
 from django.utils import timezone

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Content, ContentCategory, ContentAnalytics, ContentApproval, MediaLibrary
+from .models_pg import Content, ContentCategory, ContentAnalytics, ContentApproval, MediaLibrary
 
 
 @admin.register(Content)
