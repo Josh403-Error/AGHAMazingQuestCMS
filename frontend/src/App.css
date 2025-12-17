@@ -751,3 +751,368 @@ tr:hover {
     max-width: 60px;
   }
 }
+
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.rich-text-editor:focus-within {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 0.25rem;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar-button:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.toolbar-button:active {
+  background-color: #d1d5db;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 1.5rem;
+  background-color: #d1d5db;
+  margin: 0 0.25rem;
+}
+
+.editor-content {
+  width: 100%;
+  min-height: 8rem;
+  padding: 0.75rem;
+  border: none;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  outline: none;
+}
+
+.editor-content:focus {
+  outline: none;
+}
+
+/* Form Group Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Grid Layout Improvements */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-item-1-2 {
+  grid-column: span 2;
+}
+
+.grid-item-3-4 {
+  grid-column: span 2;
+}
+
+.grid-item-5-6 {
+  grid-column: span 2;
+}
+
+.grid-item-1-3 {
+  grid-column: span 3;
+}
+
+.grid-item-4-6 {
+  grid-column: span 3;
+}
+
+.grid-item-1-6 {
+  grid-column: span 6;
+}
+
+@media (max-width: 768px) {
+  .grid-item-1-2,
+  .grid-item-3-4,
+  .grid-item-5-6,
+  .grid-item-1-3,
+  .grid-item-4-6,
+  .grid-item-1-6 {
+    grid-column: span 6;
+  }
+  
+  .form-grid {
+    gap: 1rem;
+  }
+}
+
+/* Checkbox and Radio Styles */
+.checkbox-container,
+.radio-container {
+  display: flex;
+  align-items: center;
+  margin-right: 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  user-select: none;
+}
+
+.checkbox-container input,
+.radio-container input {
+  cursor: pointer;
+}
+
+.checkbox-custom,
+.radio-custom {
+  position: relative;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.radio-custom {
+  border-radius: 50%;
+}
+
+.checkbox-container input:checked + .checkbox-custom::after,
+.radio-container input:checked + .radio-custom::after {
+  content: "";
+  position: absolute;
+  display: block;
+  left: 0.375rem;
+  top: 0.125rem;
+  width: 0.375rem;
+  height: 0.625rem;
+  border: solid #3b82f6;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.radio-container input:checked + .radio-custom::after {
+  content: "";
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checkbox-container:hover .checkbox-custom,
+.radio-container:hover .radio-custom {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Button Styles */
+.primary-action-btn,
+.secondary-action-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.primary-action-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.primary-action-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.primary-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-action-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.secondary-action-btn:hover {
+  background-color: #e5e7eb;
+}
+
+/* File Upload Box */
+.file-upload-box {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+  cursor: pointer;
+}
+
+.file-upload-box:hover {
+  border-color: #9ca3af;
+  background-color: #f3f4f6;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.upload-hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+/* Card Styles */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+/* Form Header Controls */
+.form-header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .form-header-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-buttons {
+    justify-content: flex-end;
+  }
+}
+
+/* Chatbot Controls */
+.chatbot-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chat-bot-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.exclude-audio-checkbox {
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .chatbot-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .exclude-audio-checkbox {
+    margin-left: 0;
+  }
+}

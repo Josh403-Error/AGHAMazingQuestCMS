@@ -13,7 +13,7 @@ export default function Login({ onLogin }) {
     setLoading(true);
     setError(null);
     try {
-      const API_BASE = process.env.REACT_APP_API_URL || ((window.location.hostname === 'localhost' && window.location.port === '3000') ? 'http://localhost:8000' : '');
+      const API_BASE = process.env.REACT_APP_API_URL || ((window.location.hostname === 'localhost' && (window.location.port === '3000' || window.location.port === '3001' || window.location.port === '3002')) ? 'http://localhost:8000' : '');
       const res = await fetch(`${API_BASE}/api/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -81,31 +81,91 @@ export default function ContentForm({ item = null, onDone }) {
   };
 
   return (
-    <form onSubmit={submit} style={{ marginBottom: 16, padding: 12, border: '1px solid #ddd' }}>
-  <h3>{item ? 'Edit content' : 'Upload content'}</h3>
-      <div style={{ marginBottom: 8 }}>
-        <label>Title<br />
-          <input value={title} onChange={e => setTitle(e.target.value)} required style={{ width: '100%' }} />
+    <form onSubmit={submit} className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+      <h3 className="text-xl font-bold text-gray-800 mb-6">{item ? 'Edit Content' : 'Upload Content'}</h3>
+      
+      <div className="mb-5">
+        <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="title">
+          Title
         </label>
+        <input
+          id="title"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          placeholder="Enter content title"
+        />
       </div>
-      <div style={{ marginBottom: 8 }}>
-        <label>Body<br />
-          <textarea value={body} onChange={e => setBody(e.target.value)} rows={6} style={{ width: '100%' }} />
+      
+      <div className="mb-5">
+        <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="body">
+          Body
         </label>
+        <textarea
+          id="body"
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          rows={6}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          placeholder="Enter content body"
+        />
       </div>
-      <div style={{ marginBottom: 8 }}>
-        <label>File (optional)<br />
-          <input ref={fileInputRef} type="file" onChange={e => setFile(e.target.files[0])} />
+      
+      <div className="mb-6">
+        <label className="block text-gray-700 text-sm font-medium mb-2">
+          File (optional)
         </label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={e => setFile(e.target.files[0])}
+          className="w-full text-sm text-gray-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-lg file:border-0
+            file:text-sm file:font-medium
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100
+            transition"
+        />
+        <p className="mt-2 text-sm text-gray-500">
+          Supported formats: JPG, PNG, PDF. Max size: 10MB.
+        </p>
       </div>
+      
       {errorMsg && (
-        <div style={{ marginBottom: 8, color: 'red', whiteSpace: 'pre-wrap' }}>
-          {errorMsg}
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 whitespace-pre-wrap text-sm">{errorMsg}</p>
         </div>
       )}
-      <div>
-        <button type="submit" disabled={loading}>{loading ? (item ? 'Saving…' : 'Uploading…') : (item ? 'Save' : 'Upload')}</button> {' '}
-        <button type="button" onClick={onDone}>Cancel</button>
+      
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+        <button
+          type="submit"
+          disabled={loading}
+          className={`flex-1 py-3 px-4 rounded-lg font-medium text-white transition
+            ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+        >
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {item ? 'Saving...' : 'Uploading...'}
+            </span>
+          ) : (
+            item ? 'Save Changes' : 'Upload Content'
+          )}
+        </button>
+        
+        <button
+          type="button"
+          onClick={onDone}
+          className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );

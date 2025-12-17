@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RichTextEditor from '../components/RichTextEditor';
 
 export default function UploadContentPage() {
   const navigate = useNavigate();
@@ -54,17 +55,33 @@ export default function UploadContentPage() {
     e.preventDefault();
     setLoading(true);
 
-    // --- Replace this with your actual API call ---
+    // Create FormData object for file uploads
+    const formDataToSend = new FormData();
+    
+    // Append text fields
+    Object.keys(formData).forEach(key => {
+      formDataToSend.append(key, formData[key]);
+    });
+    
+    // Append files if they exist
+    if (imageFile) {
+      formDataToSend.append('image', imageFile);
+    }
+    
+    if (pdfFile) {
+      formDataToSend.append('pdf', pdfFile);
+    }
+
+    // Log the data being sent (for debugging purposes)
     console.log('Submitting Data:', formData, 'Image:', imageFile, 'PDF:', pdfFile);
     
+    // TODO: Replace with actual API call
     setTimeout(() => {
       setLoading(false);
       // Navigate away after successful submission
-      // 🔑 FIX: The navigate function is now used, resolving the ESLint warning.
       navigate('/dashboard/content'); 
-      
     }, 1500);
-  }
+  };
 
   return (
     // The 'card' class provides the main container styling matching your design
@@ -197,32 +214,13 @@ export default function UploadContentPage() {
           {/* Row 4: Description (Rich Text Editor Placeholder, Full Width) */}
           <div className="form-group grid-item-1-6">
             <label htmlFor="description">Description</label>
-            <div className="rich-text-editor">
-              <div className="editor-toolbar">
-                <button type="button"><b>B</b></button>
-                <button type="button"><i>I</i></button>
-                <button type="button"><u>U</u></button>
-                <button type="button">A<span className="material-icons" aria-hidden="true">arrow_drop_down</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_left</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_center</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_right</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_justify</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_list_bulleted</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_list_numbered</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">code</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">arrow_left</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">arrow_right</span></button>
-              </div>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows="8"
-                placeholder=""
-                className="editor-content"
-              ></textarea>
-            </div>
+            <RichTextEditor
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Enter content description..."
+            />
           </div>
 
           {/* Row 5: Meta Keywords & Meta Description (2 columns) */}
@@ -341,32 +339,13 @@ export default function UploadContentPage() {
           {/* Row 8: Highlights (Rich Text Editor Placeholder, Full Width) */}
           <div className="form-group grid-item-1-6">
             <label htmlFor="highlights">Highlights</label>
-            <div className="rich-text-editor">
-              <div className="editor-toolbar">
-                <button type="button"><b>B</b></button>
-                <button type="button"><i>I</i></button>
-                <button type="button"><u>U</u></button>
-                <button type="button">A<span className="material-icons" aria-hidden="true">arrow_drop_down</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_left</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_center</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_right</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_align_justify</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_list_bulleted</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">format_list_numbered</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">code</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">arrow_left</span></button>
-                <button type="button"><span className="material-icons" aria-hidden="true">arrow_right</span></button>
-              </div>
-              <textarea
-                id="highlights"
-                name="highlights"
-                value={formData.highlights}
-                onChange={handleChange}
-                rows="4"
-                placeholder=""
-                className="editor-content"
-              ></textarea>
-            </div>
+            <RichTextEditor
+              id="highlights"
+              name="highlights"
+              value={formData.highlights}
+              onChange={handleChange}
+              placeholder="Enter content highlights..."
+            />
           </div>
 
           {/* Row 9: Chat Bot & Exclude Audio (Full Width control) */}

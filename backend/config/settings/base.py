@@ -235,6 +235,8 @@ WAGTAILADMIN_BASE_URL = os.environ.get('WAGTAILADMIN_BASE_URL', 'http://localhos
 # CORS (for React frontend running on localhost:3000)
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
