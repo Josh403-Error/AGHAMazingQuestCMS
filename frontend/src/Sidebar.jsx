@@ -7,7 +7,6 @@ const LOGO_URL = "https://raw.githubusercontent.com/Marianne-101/pictures/main/d
 export default function Sidebar({ user }) {
   const roles = (user && user.roles) || [];
   const isAdmin = user?.is_superuser || roles.includes('Admin') || roles.includes('Super Admin');
-  const isSuperuser = user?.is_superuser;
   
   const [contentOpen, setContentOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -153,15 +152,6 @@ export default function Sidebar({ user }) {
                 </li>
                 <li>
                   <NavLink 
-                    to="/dashboard/content/edit" 
-                    style={({ isActive }) => isActive ? activeSubmenuStyle : submenuStyle}
-                    className={({ isActive }) => isActive ? "nav-link active submenu-link" : "nav-link submenu-link"}
-                  >
-                    Edit Content
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink 
                     to="/dashboard/content/approve" 
                     style={({ isActive }) => isActive ? activeSubmenuStyle : submenuStyle}
                     className={({ isActive }) => isActive ? "nav-link active submenu-link" : "nav-link submenu-link"}
@@ -248,8 +238,7 @@ export default function Sidebar({ user }) {
             )}
           </li>
           
-          {/* Only superusers can access user management */}
-          {isSuperuser && !sidebarCollapsed && (
+          {(isAdmin || user?.is_staff) && !sidebarCollapsed && (
             <li>
               <a 
                 href="#user-mgmt" 
@@ -293,7 +282,7 @@ export default function Sidebar({ user }) {
           <div className="user-profile">
             <div className="user-details">
               <span className="username">{user?.username}</span>
-              <span className="role">{isSuperuser ? 'Super Administrator' : isAdmin ? 'Administrator' : 'User'}</span>
+              <span className="role">{isAdmin ? 'Administrator' : 'User'}</span>
             </div>
           </div>
         </div>

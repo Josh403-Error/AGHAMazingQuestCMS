@@ -46,6 +46,34 @@ Run the setup script to automatically configure your development environment:
 ./scripts/setup_dev_env.sh
 ```
 
+## PostgreSQL Setup
+
+This project supports PostgreSQL database with pgAdmin4 administration interface. 
+
+For detailed instructions on setting up PostgreSQL and pgAdmin4 with Docker, see [PostgreSQL and pgAdmin4 Setup Guide](docs/postgresql_pgadmin_setup.md).
+
+To quickly get started:
+
+1. Update your `.env` file to use PostgreSQL:
+   ```bash
+   DB_ENGINE=postgres
+   DB_NAME=aghamazing_db
+   DB_USER=agha_user
+   DB_PASSWORD=agha_password
+   DB_HOST=db
+   DB_PORT=5432
+   ```
+
+2. From the `deployment` directory, start all services:
+   ```bash
+   cd deployment
+   docker-compose up -d
+   ```
+
+3. Access pgAdmin4 at http://localhost:5050 with credentials:
+   - Email: admin@example.com
+   - Password: admin
+
 ## Startup Scripts
 
 The project includes convenient startup scripts:

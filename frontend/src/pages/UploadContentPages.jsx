@@ -96,44 +96,44 @@ export default function UploadContentPage() {
         <div className="form-header-controls">
           <div className="checkbox-group">
             {/* Checkbox 1: AR Marker */}
-            <label className="role-checkbox">
+            <label className="checkbox-container">
               <input
                 type="checkbox"
                 name="arMarker"
                 checked={formData.arMarker}
                 onChange={handleChange}
               />
-              <span className="checkmark"></span>
+              <span className="checkbox-custom"></span>
               AR Marker
             </label>
             {/* Checkbox 2: Quiz */}
-            <label className="role-checkbox">
+            <label className="checkbox-container">
               <input
                 type="checkbox"
                 name="quiz"
                 checked={formData.quiz}
                 onChange={handleChange}
               />
-              <span className="checkmark"></span>
+              <span className="checkbox-custom"></span>
               Quiz
             </label>
             {/* Checkbox 3: Enable Badges */}
-            <label className="role-checkbox">
+            <label className="checkbox-container">
               <input
                 type="checkbox"
                 name="enableBadges"
                 checked={formData.enableBadges}
                 onChange={handleChange}
               />
-              <span className="checkmark"></span>
+              <span className="checkbox-custom"></span>
               Enable Badges
             </label>
           </div>
           <div className="action-buttons">
-            <button type="button" className="btn btn-secondary">
+            <button type="button" className="secondary-action-btn">
               Save as Draft
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="primary-action-btn" disabled={loading}>
               {loading ? 'Submitting...' : 'Submit'}
             </button>
           </div>
@@ -375,14 +375,14 @@ export default function UploadContentPage() {
                 Disallow
               </label>
             </div>
-            <label className="role-checkbox">
+            <label className="checkbox-container exclude-audio-checkbox">
               <input
                 type="checkbox"
                 name="excludeAudio"
                 checked={formData.excludeAudio}
                 onChange={handleChange}
               />
-              <span className="checkmark"></span>
+              <span className="checkbox-custom"></span>
               Exclude Audio
             </label>
           </div>

@@ -165,8 +165,8 @@ else:
         'default': {
             'ENGINE': engine,
             'NAME': os.environ.get('DB_NAME', 'aghamazing_db'),
-            'USER': os.environ.get('DB_USER', 'admin'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
+            'USER': os.environ.get('DB_USER', 'agha_user'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'agha_password'),
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '3306' if engine.endswith('mysql') else '5432'),
             'OPTIONS': {
