@@ -2,24 +2,24 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
-from apps.contentmanagement.models import ContentItem
+from apps.contentmanagement.models import Content
 
 
 ROLE_DEFS = {
     'Encoder': {
-        'perms': ['add_contentitem', 'view_contentitem'],
+        'perms': ['add_content', 'view_content'],
     },
     'Editor': {
-        'perms': ['add_contentitem', 'change_contentitem', 'view_contentitem'],
+        'perms': ['add_content', 'change_content', 'view_content'],
     },
     'Approver': {
-        'perms': ['change_contentitem', 'view_contentitem'],
+        'perms': ['change_content', 'view_content'],
     },
     'Admin': {
-        'perms': ['delete_contentitem', 'view_contentitem'],
+        'perms': ['delete_content', 'view_content'],
     },
     'Super Admin': {
-        'perms': ['add_contentitem', 'change_contentitem', 'delete_contentitem', 'view_contentitem'],
+        'perms': ['add_content', 'change_content', 'delete_content', 'view_content'],
     },
 }
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
     help = 'Create content workflow roles/groups and assign basic model permissions'
 
     def handle(self, *args, **options):
-        content_type = ContentType.objects.get_for_model(ContentItem)
+        content_type = ContentType.objects.get_for_model(Content)
 
         for role_name, details in ROLE_DEFS.items():
             group, created = Group.objects.get_or_create(name=role_name)

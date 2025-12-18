@@ -37,6 +37,25 @@ SECRET_KEY = os.environ.get(
 # in your development environment if you need debug mode locally.
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
+# Validate secret key strength in production
+if not DEBUG:
+    # Minimum length requirement (Django default is 50 characters)
+    MIN_SECRET_KEY_LENGTH = int(os.environ.get('DJANGO_MIN_SECRET_KEY_LENGTH', 50))
+    
+    # Check if key is too short
+    if len(SECRET_KEY) < MIN_SECRET_KEY_LENGTH:
+        raise RuntimeError(
+            f'SECRET_KEY is too short in production. Must be at least {MIN_SECRET_KEY_LENGTH} characters. '
+            'Set DJANGO_MIN_SECRET_KEY_LENGTH to customize the minimum length.'
+        )
+    
+    # Check if key uses default Django insecure prefix
+    if SECRET_KEY.startswith('django-insecure-'):
+        raise RuntimeError(
+            'Insecure SECRET_KEY prefix in production. Do not use keys starting with "django-insecure-". '
+            'Generate a new secure key and set it in the DJANGO_SECRET_KEY environment variable.'
+        )
+
 # Hosts allowed to serve the app. Read from env, splitting on commas and
 # stripping whitespace. If the env var is missing or doesn't include the
 # machine's hostname (common in some container setups), append a sensible
@@ -55,6 +74,12 @@ except Exception:
     # if socket fails for any reason, just continue with the parsed list
     pass
 
+# CSRF trusted origins for handling requests from nginx proxy
+_raw_csrf_trusted = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8080,http://localhost:8000,http://hosting-pc.tail013787.ts.net:8080",
+)
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _raw_csrf_trusted.split(",") if origin.strip()]
 
 # Application definition
 
@@ -256,6 +281,18 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
 }
+
+# CSRF trusted origins allow safe cross-origin POST requests without failing CSRF validation.
+# Default to common local development origins. Override via environment variable in production.
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',  # Common React development port
+    'http://localhost:3001',  # Alternative local development port
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+]
+_raw_csrf_trusted = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
+if _raw_csrf_trusted:
+    CSRF_TRUSTED_ORIGINS += [origin.strip() for origin in _raw_csrf_trusted.split(',') if origin.strip()]
 
 # Simple JWT defaults: short access token, longer refresh token
 SIMPLE_JWT = {
