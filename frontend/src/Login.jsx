@@ -15,10 +15,10 @@ export default function Login({ onLogin }) {
     setError(null);
     try {
       const API_BASE = process.env.REACT_APP_API_URL || ((window.location.hostname === 'localhost' && (window.location.port === '3000' || window.location.port === '3001' || window.location.port === '3002')) ? 'http://localhost:8000' : '');
-      const res = await fetch(`${API_BASE}/api/auth/login/`, {
+      const res = await fetch(`${API_BASE}/api/auth/token/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email: username, password }),
       });
       const ct = (res.headers.get('content-type') || '').toLowerCase();
       if (ct.includes('application/json')) {
@@ -89,13 +89,13 @@ export default function Login({ onLogin }) {
             )}
             
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">Email</label>
               <input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Enter your email address"
                 required
                 disabled={loading}
               />

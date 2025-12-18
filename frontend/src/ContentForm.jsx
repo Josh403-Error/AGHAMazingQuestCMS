@@ -1,34 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { fetchAuth } from './api';
+import React, { useState, useEffect } from 'react';
+import RichTextEditor from './components/RichTextEditor';
+import MediaLibrary from './components/MediaLibrary';
 
-export default function ContentForm({ item = null, onDone }) {
+export default function ContentForm({ item, onDone }) {
   const [title, setTitle] = useState(item?.title || '');
   const [body, setBody] = useState(item?.body || '');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const fileInputRef = useRef(null);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setTitle(item?.title || '');
     setBody(item?.body || '');
   }, [item]);
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
+
     try {
-      const fd = new FormData();
-      fd.append('title', title);
-      fd.append('body', body);
-      if (file) fd.append('file', file);
+      // Determine if we're creating or updating
+      const url = item ? `/api/content/content/${item.id}/` : '/api/content/content/';
+      const method = item ? 'PUT' : 'POST';
 
-      const url = item ? `/api/content/items/${item.id}/` : '/api/content/items/';
-      const method = item ? 'PATCH' : 'POST';
+      // Prepare the form data
+      const formData = {
+        title,
+        body,
+      };
+      if (file) formData.file = file;
 
-      const res = await fetchAuth(url, {
+      // Make the request
+      const token = localStorage.getItem('token');
+      const res = await fetch(url, {
         method,
-        body: fd,
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
@@ -81,7 +92,7 @@ export default function ContentForm({ item = null, onDone }) {
   };
 
   return (
-    <form onSubmit={submit} className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
       <h3 className="text-xl font-bold text-gray-800 mb-6">{item ? 'Edit Content' : 'Upload Content'}</h3>
       
       <div className="mb-5">

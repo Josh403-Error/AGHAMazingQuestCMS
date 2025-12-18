@@ -68,6 +68,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # PostgreSQL extensions
+    'django.contrib.postgres',
+
     # Wagtail CMS
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
@@ -88,6 +91,7 @@ INSTALLED_APPS = [
     # REST Framework
     'rest_framework',
     'corsheaders',
+    'django_filters',
 
     # Your apps
     'apps.authentication',
@@ -225,6 +229,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'usermanagement.User'
 
 # Sites framework (required by Wagtail)
 SITE_ID = int(os.environ.get('DJANGO_SITE_ID', 1))

@@ -22,7 +22,7 @@ export default function EditContentPage() {
     // API call to fetch the specific item details
     const fetchItem = async () => {
         try {
-            const res = await fetch(`/api/content/items/${id}/`, {
+            const res = await fetch(`/api/content/content/${id}/`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             

@@ -1,41 +1,114 @@
 from rest_framework import serializers
-from .models import Content
-from apps.usermanagement.serializers import UserSerializer
+from .models import (
+    Content, ContentCategory, ContentAnalytics, ContentApproval, 
+    MediaLibrary, ContentMedia, Challenge, Marker, 
+    ChallengeProgress, Feedback, ChatSession
+)
+from apps.usermanagement.models import User, Role
+
+
+class ContentCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentCategory
+        fields = '__all__'
+
+
+class ContentAnalyticsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentAnalytics
+        fields = '__all__'
 
 
 class ContentSerializer(serializers.ModelSerializer):
-    file_url = serializers.SerializerMethodField(read_only=True)
-    # Expose related user objects (read-only) so the frontend can show names
-    author = UserSerializer(read_only=True)
-    
     class Meta:
         model = Content
-        fields = [
-            'id', 'title', 'body', 'file_path', 'status',
-            'author', 'created_at', 'published_at', 'deleted_at',
-            'file_url', 'excerpt', 'content_type'
-        ]
-        read_only_fields = ['status', 'author', 'created_at', 'published_at', 'deleted_at']
+        fields = '__all__'
+        read_only_fields = ('author',)
+
+
+class ContentApprovalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentApproval
+        fields = '__all__'
+
+
+class MediaLibrarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaLibrary
+        fields = '__all__'
+
+
+class ContentMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentMedia
+        fields = '__all__'
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = '__all__'
+
+
+class MarkerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Marker
+        fields = '__all__'
+
+
+class ChallengeProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChallengeProgress
+        fields = '__all__'
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = '__all__'
+
+
+class ChatSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatSession
+        fields = '__all__'
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
+class UserSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source='role.name', read_only=True)
+    
+    class Meta:
+        model = User
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'avatar_url', 'is_active', 'metadata', 'last_login_at',
+            'role', 'role_name', 'created_at', 'updated_at'
+        )
+        read_only_fields = ('last_login_at', 'created_at', 'updated_at')
 
     def create(self, validated_data):
-        # file uploads handled by DRF parser
-        return super().create(validated_data)
+        # Handle password properly
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+        return user
 
-    def get_file_url(self, obj):
-        """Return an absolute URL for the attached file if present.
-
-        Uses request in context when available so the frontend can get a usable URL.
-        """
-        try:
-            if not obj.file_path:
-                return None
-            request = self.context.get('request') if self.context else None
-            url = obj.file_path
-            if request:
-                return request.build_absolute_uri(url)
-            # Fallback: if url is already absolute, return it; else prefix origin
-            if url.startswith('http'):
-                return url
-            return f"{request.scheme if request else 'https'}://{request.get_host() if request else ''}{url}"
-        except Exception:
-            return None
+    def update(self, instance, validated_data):
+        # Handle password properly
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance

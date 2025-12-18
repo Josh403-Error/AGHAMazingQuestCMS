@@ -1,42 +1,45 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from django.contrib.auth.models import Group
+from .models import Role, User
 
 User = get_user_model()
 
 
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
-    # Expose Django auth Groups under the name `roles` for clarity in the API
-    roles = serializers.SlugRelatedField(many=True, slug_field='name', queryset=Group.objects.all(), source='groups')
-    password = serializers.CharField(write_only=True, required=False)
+    role_name = serializers.CharField(source='role.name', read_only=True)
 
     class Meta:
         model = User
         fields = (
-            'id', 'username', 'email', 'first_name', 'last_name',
-            'is_active', 'is_staff', 'is_superuser', 'roles', 'password'
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'avatar_url', 'is_active', 'metadata', 'last_login_at',
+            'role', 'role_name', 'created_at', 'updated_at'
         )
+        read_only_fields = ('last_login_at', 'created_at', 'updated_at')
 
     def create(self, validated_data):
-        pw = validated_data.pop('password', None)
-        groups = validated_data.pop('groups', [])
+        # Handle password properly
+        password = validated_data.pop('password', None)
         user = User(**validated_data)
-        if pw:
-            user.set_password(pw)
+        if password:
+            user.set_password(password)
         else:
             user.set_unusable_password()
         user.save()
-        user.groups.set(groups)
         return user
 
     def update(self, instance, validated_data):
-        pw = validated_data.pop('password', None)
-        groups = validated_data.pop('groups', None)
-        for k, v in validated_data.items():
-            setattr(instance, k, v)
-        if pw:
-            instance.set_password(pw)
+        # Handle password properly
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
         instance.save()
-        if groups is not None:
-            instance.groups.set(groups)
         return instance

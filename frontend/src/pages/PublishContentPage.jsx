@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import statusLabel from '../utils/statusLabels';
 import ContentPreview from '../components/ContentPreview';
@@ -6,13 +6,12 @@ import ContentPreview from '../components/ContentPreview';
 export default function PublishContentPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [previewId, setPreviewId] = useState(null);
   const token = localStorage.getItem('access');
 
-  const fetchItems = React.useCallback(async () => {
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-  const res = await fetch('/api/content/items/?status=for_publishing', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/content/content/?status=for_publishing', { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('Failed to load');
       const data = await res.json();
       setItems(data);
@@ -27,7 +26,7 @@ export default function PublishContentPage() {
 
   const doPublish = async (id) => {
     try {
-      const res = await fetch(`/api/content/items/${id}/publish/`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/content/content/${id}/publish/`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('Publish failed');
       fetchItems();
     } catch (err) { console.error(err); alert(String(err)); }

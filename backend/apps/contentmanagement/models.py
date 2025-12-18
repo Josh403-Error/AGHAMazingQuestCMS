@@ -1,11 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
-from wagtail.models import Page
 from django.conf import settings
 from django.utils import timezone
-from django.utils.text import slugify
+from django.core.validators import MaxLengthValidator
 import uuid
-from django.db.models import Q
+from django.contrib.postgres.fields import ArrayField
+
 
 
 class BaseEntity(models.Model):
@@ -55,6 +54,10 @@ class ContentCategory(BaseEntity):
             self.path = str(self.id)
         super().save(*args, **kwargs)
 
+    class Meta:
+        db_table = 'content_category'
+        unique_together = ('name', 'parent')
+
 
 class ContentAnalytics(BaseEntity):
     """
@@ -67,6 +70,7 @@ class ContentAnalytics(BaseEntity):
     report_generated_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        db_table = 'content_analytics'
         verbose_name_plural = "Content analytics"
 
 
@@ -91,22 +95,20 @@ class Content(BaseEntity):
     """
     title = models.CharField(max_length=255)
     body = models.TextField()
-    excerpt = models.TextField()
+    excerpt = models.TextField(validators=[MaxLengthValidator(500)])
     file_path = models.TextField()
     status = models.CharField(max_length=20, choices=ContentStatus.choices, default=ContentStatus.DRAFT)
     content_type = models.CharField(max_length=20, choices=ContentTypeEnum.choices)
     published_at = models.DateTimeField(null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.RESTRICT)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='contents')
     category = models.ForeignKey(ContentCategory, on_delete=models.SET_NULL, null=True, blank=True)
     analytics = models.OneToOneField(ContentAnalytics, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
 
-    # Temporarily removed constraints due to syntax issues
-    # Will add them back later with correct syntax
     class Meta:
-        pass
+        db_table = 'content'
 
 
 class ApprovalStatus(models.TextChoices):
@@ -120,10 +122,13 @@ class ContentApproval(BaseEntity):
     Content approval tracking
     """
     content = models.ForeignKey(Content, on_delete=models.CASCADE)
-    approver = models.ForeignKey(User, on_delete=models.RESTRICT)
+    approver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     approved_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=ApprovalStatus.choices, default=ApprovalStatus.PENDING)
     comments = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'content_approval'
 
 
 class MediaLibrary(BaseEntity):
@@ -136,9 +141,10 @@ class MediaLibrary(BaseEntity):
     mime_type = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     tags = models.JSONField(default=list)
-    uploader = models.ForeignKey(User, on_delete=models.RESTRICT)
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
 
     class Meta:
+        db_table = 'media_library'
         verbose_name_plural = "Media library"
 
     def __str__(self):
@@ -154,6 +160,7 @@ class ContentMedia(models.Model):
     display_order = models.IntegerField(default=0)
 
     class Meta:
+        db_table = 'content_media'
         unique_together = ('content', 'media')
 
 
@@ -174,7 +181,10 @@ class Challenge(BaseEntity):
     points = models.IntegerField(default=0)
     # Note: We'll handle the circular reference between Challenge and Marker differently
     # marker = models.ForeignKey('Marker', on_delete=models.SET_NULL, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.RESTRICT)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
+
+    class Meta:
+        db_table = 'challenge'
 
 
 class Marker(BaseEntity):
@@ -187,6 +197,9 @@ class Marker(BaseEntity):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     content_url = models.TextField()
     challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True, blank=True, related_name='markers')
+
+    class Meta:
+        db_table = 'marker'
 
     # Temporarily removed constraints due to syntax issues
     # Will add them back later with correct syntax
@@ -203,12 +216,13 @@ class ChallengeProgress(BaseEntity):
     """
     Track user progress on challenges
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
     completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        db_table = 'challenge_progress'
         unique_together = ('user', 'challenge')
 
 
@@ -216,9 +230,12 @@ class Feedback(BaseEntity):
     """
     User feedback model
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rating = models.SmallIntegerField()
-    comment = models.TextField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True, validators=[MaxLengthValidator(1000)])
+
+    class Meta:
+        db_table = 'feedback'
 
     # Temporarily removed constraints due to syntax issues
     # Will add them back later with correct syntax
@@ -230,10 +247,13 @@ class ChatSession(BaseEntity):
     """
     Chat session model
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     started_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(null=True, blank=True)
     message_count = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'chat_session'
 
     # Temporarily removed constraints due to syntax issues
     # Will add them back later with correct syntax
