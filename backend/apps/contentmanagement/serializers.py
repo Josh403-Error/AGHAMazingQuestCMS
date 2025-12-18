@@ -1,24 +1,21 @@
 from rest_framework import serializers
-from .models import ContentItem
+from .models import Content
 from apps.usermanagement.serializers import UserSerializer
 
 
-class ContentItemSerializer(serializers.ModelSerializer):
+class ContentSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField(read_only=True)
     # Expose related user objects (read-only) so the frontend can show names
-    created_by = UserSerializer(read_only=True)
-    edited_by = UserSerializer(read_only=True)
-    approved_by = UserSerializer(read_only=True)
-    published_by = UserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
+    
     class Meta:
-        model = ContentItem
+        model = Content
         fields = [
-            'id', 'title', 'slug', 'body', 'file', 'status',
-            'created_by', 'created_at', 'edited_by', 'edited_at',
-            'approved_by', 'approved_at', 'published_by', 'published_at', 'is_deleted',
-            'file_url',
+            'id', 'title', 'body', 'file_path', 'status',
+            'author', 'created_at', 'published_at', 'deleted_at',
+            'file_url', 'excerpt', 'content_type'
         ]
-        read_only_fields = ['slug', 'status', 'created_by', 'created_at', 'edited_by', 'edited_at', 'approved_by', 'approved_at', 'published_by', 'published_at', 'is_deleted']
+        read_only_fields = ['status', 'author', 'created_at', 'published_at', 'deleted_at']
 
     def create(self, validated_data):
         # file uploads handled by DRF parser
@@ -27,13 +24,13 @@ class ContentItemSerializer(serializers.ModelSerializer):
     def get_file_url(self, obj):
         """Return an absolute URL for the attached file if present.
 
-        Uses request in context when available so the mobile app gets a usable URL.
+        Uses request in context when available so the frontend can get a usable URL.
         """
         try:
-            if not obj.file:
+            if not obj.file_path:
                 return None
             request = self.context.get('request') if self.context else None
-            url = obj.file.url
+            url = obj.file_path
             if request:
                 return request.build_absolute_uri(url)
             # Fallback: if url is already absolute, return it; else prefix origin

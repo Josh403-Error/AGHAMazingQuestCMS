@@ -1,16 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from .permissions import IsContentWorkflowAllowed
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from .models import ContentItem
-from .serializers import ContentItemSerializer
+from .models import Content
+from .serializers import ContentSerializer
 from .permissions import user_in_group
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-
 
 class GamePublishedContentList(APIView):
     """Authenticated endpoint to list published content for mobile games.
@@ -21,19 +19,19 @@ class GamePublishedContentList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        qs = ContentItem.objects.filter(is_deleted=False, status=ContentItem.STATUS_PUBLISHED).order_by('-published_at')
-        serializer = ContentItemSerializer(qs, many=True, context={'request': request})
+        qs = Content.objects.filter(deleted_at__isnull=True, status=Content.Status.PUBLISHED).order_by('-published_at')
+        serializer = ContentSerializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
 
 
-class ContentItemViewSet(viewsets.ModelViewSet):
-    queryset = ContentItem.objects.filter(is_deleted=False).all()
-    serializer_class = ContentItemSerializer
+class ContentViewSet(viewsets.ModelViewSet):
+    queryset = Content.objects.filter(deleted_at__isnull=True).all()
+    serializer_class = ContentSerializer
     # Require authentication and check role-based permissions for actions
     permission_classes = [IsAuthenticated, IsContentWorkflowAllowed]
 
     def get_queryset(self):
-        qs = ContentItem.objects.filter(is_deleted=False)
+        qs = Content.objects.filter(deleted_at__isnull=True)
         status_q = self.request.query_params.get('status')
         if status_q:
             qs = qs.filter(status=status_q)
@@ -43,7 +41,7 @@ class ContentItemViewSet(viewsets.ModelViewSet):
         # When a new content item is uploaded by an Encoder/Editor, set its status
         # to 'edited' (i.e. ready for final editing) and record who created it.
         # Save with the new workflow initial state: For editing
-        serializer.save(created_by=self.request.user, status=ContentItem.STATUS_FOR_EDITING)
+        serializer.save(author=self.request.user, status=Content.Status.DRAFT)
 
     def create(self, request, *args, **kwargs):
         """Create endpoint returns a friendly message and the created Content ID.
@@ -58,7 +56,7 @@ class ContentItemViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        # serializer.instance is the saved ContentItem
+        # serializer.instance is the saved Content
         response_data = {
             'message': 'Content Uploaded',
             'id': serializer.instance.id,
@@ -67,18 +65,17 @@ class ContentItemViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_update(self, serializer):
-        obj = serializer.save(edited_by=self.request.user)
-        obj.edited_at = obj.edited_at or None
+        obj = serializer.save()
 
     @action(detail=True, methods=['post'])
     def send_for_approval(self, request, pk=None):
-        item = get_object_or_404(ContentItem, pk=pk, is_deleted=False)
+        item = get_object_or_404(Content, pk=pk, deleted_at__isnull=True)
         item.send_for_approval(user=request.user)
         return Response(self.get_serializer(item).data)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
-        item = get_object_or_404(ContentItem, pk=pk, is_deleted=False)
+        item = get_object_or_404(Content, pk=pk, deleted_at__isnull=True)
         # Only users in Approver group or superusers can approve
         if not (request.user.is_superuser or user_in_group(request.user, 'Approver')):
             return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
@@ -88,12 +85,12 @@ class ContentItemViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def deny(self, request, pk=None):
         """Deny approval: move item back to 'For editing' so editors can modify and re-submit."""
-        item = get_object_or_404(ContentItem, pk=pk, is_deleted=False)
+        item = get_object_or_404(Content, pk=pk, deleted_at__isnull=True)
         # Only approvers or superusers can deny
         if not (request.user.is_superuser or user_in_group(request.user, 'Approver')):
             return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         # clear approval metadata and move back to editing
-        item.status = ContentItem.STATUS_FOR_EDITING
+        item.status = Content.STATUS_FOR_EDITING
         item.approved_by = None
         item.approved_at = None
         # record that it was sent back for editing
@@ -103,7 +100,7 @@ class ContentItemViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def publish(self, request, pk=None):
-        item = get_object_or_404(ContentItem, pk=pk, is_deleted=False)
+        item = get_object_or_404(Content, pk=pk, deleted_at__isnull=True)
         # Only users in Approver group or superusers can publish
         if not (request.user.is_superuser or user_in_group(request.user, 'Approver')):
             return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
@@ -113,7 +110,7 @@ class ContentItemViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         # soft delete
         instance = self.get_object()
-        instance.soft_delete(user=request.user)
+        instance.soft_delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 from django.shortcuts import render
 
