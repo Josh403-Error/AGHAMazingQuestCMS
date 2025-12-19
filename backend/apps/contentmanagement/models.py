@@ -201,11 +201,6 @@ class Marker(BaseEntity):
     class Meta:
         db_table = 'marker'
 
-    # Temporarily removed constraints due to syntax issues
-    # Will add them back later with correct syntax
-    class Meta:
-        pass
-
 
 # Add the foreign key from Challenge to Marker after both models are defined
 # This resolves the circular reference
@@ -237,11 +232,6 @@ class Feedback(BaseEntity):
     class Meta:
         db_table = 'feedback'
 
-    # Temporarily removed constraints due to syntax issues
-    # Will add them back later with correct syntax
-    class Meta:
-        pass
-
 
 class ChatSession(BaseEntity):
     """
@@ -254,8 +244,3 @@ class ChatSession(BaseEntity):
 
     class Meta:
         db_table = 'chat_session'
-
-    # Temporarily removed constraints due to syntax issues
-    # Will add them back later with correct syntax
-    class Meta:
-        pass

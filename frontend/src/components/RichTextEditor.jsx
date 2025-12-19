@@ -124,7 +124,7 @@ const RichTextEditor = ({ value, onChange, placeholder, id, name }) => {
           title="Bullet List"
           className="toolbar-button"
         >
-          <span className="material-icons" aria-hidden="true">format_list_bulleted</span>
+          <span className="material-icons text-base" aria-hidden="true">format_list_bulleted</span>
         </button>
         <button 
           type="button" 
@@ -132,7 +132,7 @@ const RichTextEditor = ({ value, onChange, placeholder, id, name }) => {
           title="Numbered List"
           className="toolbar-button"
         >
-          <span className="material-icons" aria-hidden="true">format_list_numbered</span>
+          <span className="material-icons text-base" aria-hidden="true">format_list_numbered</span>
         </button>
         <div className="toolbar-divider"></div>
         <button 
@@ -141,7 +141,7 @@ const RichTextEditor = ({ value, onChange, placeholder, id, name }) => {
           title="Heading"
           className="toolbar-button"
         >
-          <span className="material-icons" aria-hidden="true">title</span>
+          <span className="material-icons text-base" aria-hidden="true">title</span>
         </button>
         <button 
           type="button" 
@@ -149,7 +149,7 @@ const RichTextEditor = ({ value, onChange, placeholder, id, name }) => {
           title="Horizontal Rule"
           className="toolbar-button"
         >
-          <span className="material-icons" aria-hidden="true">horizontal_rule</span>
+          <span className="material-icons text-base" aria-hidden="true">horizontal_rule</span>
         </button>
       </div>
       <textarea

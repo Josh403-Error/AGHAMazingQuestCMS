@@ -71,7 +71,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body text-center py-5">
-              <i className="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+              <i className="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
               <p>Could not load content preview.</p>
             </div>
             <div className="modal-footer">
@@ -100,7 +100,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                   className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}
                   onClick={() => setActiveTab('preview')}
                 >
-                  <i className="fas fa-eye me-2"></i>
+                  <i className="fas fa-eye me-1"></i>
                   Preview
                 </button>
               </li>
@@ -109,7 +109,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                   className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
                   onClick={() => setActiveTab('details')}
                 >
-                  <i className="fas fa-info-circle me-2"></i>
+                  <i className="fas fa-info-circle me-1"></i>
                   Details
                 </button>
               </li>
@@ -118,7 +118,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                   className={`nav-link ${activeTab === 'analytics' ? 'active' : ''}`}
                   onClick={() => setActiveTab('analytics')}
                 >
-                  <i className="fas fa-chart-bar me-2"></i>
+                  <i className="fas fa-chart-bar me-1"></i>
                   Analytics
                 </button>
               </li>
@@ -325,7 +325,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                               </div>
                             </div>
                             <div className="col-auto">
-                              <i className="fas fa-eye fa-2x text-gray-300"></i>
+                              <i className="fas fa-eye fa-sm text-gray-300"></i>
                             </div>
                           </div>
                         </div>
@@ -346,7 +346,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                               </div>
                             </div>
                             <div className="col-auto">
-                              <i className="fas fa-percentage fa-2x text-gray-300"></i>
+                              <i className="fas fa-percentage fa-sm text-gray-300"></i>
                             </div>
                           </div>
                         </div>
@@ -367,7 +367,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                               </div>
                             </div>
                             <div className="col-auto">
-                              <i className="fas fa-chart-line fa-2x text-gray-300"></i>
+                              <i className="fas fa-chart-line fa-sm text-gray-300"></i>
                             </div>
                           </div>
                         </div>
@@ -422,7 +422,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                   className="btn btn-success"
                   onClick={onApprove}
                 >
-                  <i className="fas fa-check me-2"></i>
+                  <i className="fas fa-check fa-sm me-1"></i>
                   Approve
                 </button>
                 <button 
@@ -430,7 +430,7 @@ export default function ContentPreview({ item: initialItem, id, onClose, showApp
                   className="btn btn-danger"
                   onClick={onDeny}
                 >
-                  <i className="fas fa-times me-2"></i>
+                  <i className="fas fa-times fa-sm me-1"></i>
                   Deny
                 </button>
               </>

@@ -286,18 +286,18 @@ const MediaLibrary = ({ onSelect, multiSelect = false }) => {
                 className={`card h-100 media-item-card ${selectedItems.includes(item.id) ? 'border-primary border-2' : ''}`}
                 onClick={() => handleSelectItem(item)}
               >
-                <div className="card-img-top d-flex align-items-center justify-content-center" style={{ height: '120px', backgroundColor: '#f8f9fa' }}>
+                <div className="card-img-top d-flex align-items-center justify-content-center" style={{ height: '100px', backgroundColor: '#f8f9fa' }}>
                   {item.mime_type?.startsWith('image/') ? (
                     <img 
                       src={item.file_path} 
                       alt={item.file_name} 
                       className="img-fluid" 
-                      style={{ maxHeight: '110px', objectFit: 'cover' }}
+                      style={{ maxHeight: '90px', objectFit: 'cover' }}
                     />
                   ) : (
-                    <div className="text-center">
-                      <i className={`${getFileIcon(item.mime_type)} fa-2x`}></i>
-                      <div className="mt-2 small text-muted">{item.file_name}</div>
+                    <div className="text-center p-2">
+                      <i className={`${getFileIcon(item.mime_type)} fa-lg`}></i>
+                      <div className="mt-1 small text-muted">{item.file_name}</div>
                     </div>
                   )}
                 </div>
@@ -357,8 +357,8 @@ const MediaLibrary = ({ onSelect, multiSelect = false }) => {
                   )}
                   <td>
                     <div className="d-flex align-items-center">
-                      <i className={`${getFileIcon(item.mime_type)} me-2`}></i>
-                      <span className="text-truncate" style={{ maxWidth: '200px' }}>
+                      <i className={`${getFileIcon(item.mime_type)} me-1`}></i>
+                      <span className="text-truncate" style={{ maxWidth: '180px' }}>
                         {item.file_name}
                       </span>
                     </div>
