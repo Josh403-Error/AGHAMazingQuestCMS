@@ -15,6 +15,15 @@ export default function ViewAnalyticsPage() {
 
   const { setActiveTab } = useOutletContext() || {};
 
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
   useEffect(() => {
     if (setActiveTab) {
       setActiveTab('view');

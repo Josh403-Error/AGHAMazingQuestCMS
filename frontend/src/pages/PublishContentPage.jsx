@@ -6,6 +6,7 @@ import ContentPreview from '../components/ContentPreview';
 export default function PublishContentPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [previewId, setPreviewId] = useState(null);
   const token = localStorage.getItem('access');
 
   const fetchItems = useCallback(async () => {

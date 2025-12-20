@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import RichTextEditor from './components/RichTextEditor';
 import MediaLibrary from './components/MediaLibrary';
 
@@ -8,6 +8,8 @@ export default function ContentForm({ item, onDone }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [errorMsg, setErrorMsg] = useState('');
+  const fileInputRef = useRef();
 
   useEffect(() => {
     setTitle(item?.title || '');
