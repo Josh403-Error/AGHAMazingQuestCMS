@@ -343,5 +343,7 @@ if not DEBUG:
             pass
 
     # Ensure DEBUG is False in production
-    DEBUG = False
+    # Only force DEBUG to False if we're not in debug mode already
+    if os.environ.get('DJANGO_DEBUG', 'False').lower() != 'true':
+        DEBUG = False
 
