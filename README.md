@@ -24,39 +24,185 @@ A Content Management System for managing game content with workflow capabilities
 - Node.js v18+ (for local frontend development)
 - Python 3.11 (for local development)
 
-## Getting Started
+## Environment Setup
 
-1. Clone the repository:
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd AGHAMazingQuestCMS
+```
+
+### 2. Configure Environment Variables
+Copy the example environment file and customize it:
+```bash
+cp .env.example .env
+```
+
+Edit the [.env](file:///C:/Users/apcadmin/Documents/GitHub/AGHAMazingQuestCMS/.env) file with your configuration. Key variables include:
+- `DJANGO_SECRET_KEY`: Secret key for Django application
+- `DB_PASSWORD`: PostgreSQL database password
+- `PGADMIN_DEFAULT_PASSWORD`: pgAdmin default password
+
+### 3. Build and Start Services
+Navigate to the deployment directory and start all services:
+```bash
+cd deployment
+docker-compose up --build
+```
+
+This will start four containers:
+- `deployment-web-1`: Django application server
+- `deployment-db-1`: PostgreSQL database
+- `deployment-nginx-1`: Nginx reverse proxy
+- `deployment-pgadmin-1`: pgAdmin web interface
+
+## Accessing Services
+
+After successful startup, you can access the following services:
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| Main Application | http://localhost:8080 | React frontend with integrated CMS |
+| Django Admin | http://localhost:8080/admin/ | Administrative interface |
+| Wagtail CMS | http://localhost:8080/cms/ | Content management system |
+| pgAdmin | http://localhost:5050 | Database administration tool |
+| Direct Database Access | localhost:5433 | Direct PostgreSQL connection |
+
+### Django Admin Credentials
+
+To access the Django Admin interface, use the following credentials:
+- **Username**: admin
+- **Email**: admin@example.com
+- **Password**: admin123
+
+For detailed information about Django Admin setup and troubleshooting, see our [Django Admin Setup Guide](docs/django_admin_setup.md).
+
+## Application Workflows
+
+The CMS supports a complete content workflow:
+
+1. **Content Creation**: Users with Encoder role can create content
+2. **Content Editing**: Editors can modify content
+3. **Content Approval**: Approvers can approve content for publication
+4. **Content Publishing**: Admins can publish approved content
+
+## Managing Users and Roles
+
+### Creating Test Users
+
+To create a test user with default role:
+```bash
+docker exec -it deployment-web-1 python manage.py create_test_user
+```
+
+To create a superuser:
+```bash
+docker exec -it deployment-web-1 python manage.py shell -c "from apps.usermanagement.models import User, Role; from django.contrib.auth.hashers import make_password; admin_role, _ = Role.objects.get_or_create(name='Admin', defaults={'description': 'Administrator'}); User.objects.create(email='your-email@example.com', username='yourusername', first_name='First', last_name='Last', role=admin_role, password=make_password('yourpassword'), is_staff=True, is_superuser=True)"
+```
+
+### Available Roles
+
+The system comes with predefined roles:
+- **Encoder**: Can create content
+- **Editor**: Can create and edit content
+- **Approver**: Can approve content for publication
+- **Admin**: Can publish content
+- **Super Admin**: Full system access
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+1. **Django Admin Styling Not Loading**
+   - Ensure nginx is properly configured to serve static files from [/app/staticfiles/](file:///app/staticfiles/)
+   - Restart nginx container after configuration changes:
+     ```bash
+     docker restart deployment-nginx-1
+     ```
+
+2. **Permission Denied When Accessing Django Admin**
+   - Verify user has `is_staff=True` and `is_superuser=True` flags
+   - Update user permissions:
+     ```bash
+     docker exec -it deployment-web-1 python manage.py shell -c "from apps.usermanagement.models import User; u = User.objects.get(email='admin@example.com'); u.is_staff = True; u.is_superuser = True; u.save()"
+     ```
+
+3. **Database Connection Issues**
+   - Check that the database container is running:
+     ```bash
+     docker ps | grep deployment-db
+     ```
+   - Verify database credentials in [.env](file:///C:/Users/apcadmin/Documents/GitHub/AGHAMazingQuestCMS/.env) file
+
+4. **Frontend Not Loading**
+   - Ensure frontend has been built and `frontend/build` directory exists
+   - Check nginx configuration for proper static file serving
+
+For detailed Django Admin troubleshooting, see our [Django Admin Setup Guide](docs/django_admin_setup.md).
+
+### Checking Service Status
+
+To check if all services are running:
+```bash
+docker ps
+```
+
+To check logs for a specific service:
+```bash
+docker logs <container-name>
+```
+
+For example, to check web service logs:
+```bash
+docker logs deployment-web-1
+```
+
+## Development
+
+### Local Frontend Development
+
+To develop the frontend locally:
+```bash
+cd frontend
+npm install
+npm start
+```
+
+This will start the React development server on http://localhost:3000
+
+### Local Backend Development
+
+For backend development:
+1. Set up a Python virtual environment:
    ```bash
-   git clone <repository-url>
-   cd AGHAMazingQuestCMS
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
    ```
 
-2. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your configuration
-   ```
+2. Configure environment variables as needed
 
-3. Start all services:
+3. Run the development server:
    ```bash
-   cd deployment
-   docker-compose up --build
+   python manage.py runserver
    ```
-
-4. Access the services:
-   - Main Application: http://localhost
-   - pgAdmin: http://localhost:5050
-   - Direct Database Access: localhost:5433
 
 ## Documentation
 
 - [Running Instructions](RUNNING_INSTRUCTIONS.md)
 - [PostgreSQL and pgAdmin Setup](docs/postgresql_pgadmin_setup.md)
+- [Django Admin Setup Guide](docs/django_admin_setup.md)
 
 ## Project Structure
 
 - `backend/`: Django backend application
+  - `apps/`: Individual Django applications
+    - `authentication/`: User authentication
+    - `contentmanagement/`: Content management features
+    - `usermanagement/`: User and role management
+    - `analyticsmanagement/`: Analytics and reporting
+  - `config/`: Django settings and configuration
 - `frontend/`: React frontend application
 - `deployment/`: Docker and Docker Compose configurations
 - `docs/`: Project documentation
