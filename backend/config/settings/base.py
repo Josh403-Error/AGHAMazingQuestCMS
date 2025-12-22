@@ -291,6 +291,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3001',
     'http://localhost:8080',  # Nginx proxy port
     'http://localhost:8000',  # Direct Django access
+    'http://hosting-pc.tail013787.ts.net:8080',  # Hostname from nginx config
 ]
 _raw_csrf_trusted = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
 if _raw_csrf_trusted:
@@ -304,6 +305,9 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
 }
 
+# Wagtail settings
+WAGTAIL_SITE_NAME = 'AGHAMazing Quest CMS'
+WAGTAILADMIN_BASE_URL = os.environ.get('WAGTAILADMIN_BASE_URL', 'http://localhost:8080')
 
 # ---------- Security / production defaults
 # When DEBUG is False, pick sensible secure defaults from environment variables.
