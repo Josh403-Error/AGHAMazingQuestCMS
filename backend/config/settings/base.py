@@ -289,6 +289,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3001',  # Alternative local development port
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    'http://localhost:8080',  # Nginx proxy port
+    'http://localhost:8000',  # Direct Django access
 ]
 _raw_csrf_trusted = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
 if _raw_csrf_trusted:

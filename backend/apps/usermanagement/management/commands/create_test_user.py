@@ -26,14 +26,21 @@ class Command(BaseCommand):
         # Create a test user if one doesn't already exist
         username = options['username']
         if not User.objects.filter(username=username).exists():
-            user = User.objects.create_user(
+            user = User(
                 username=username,
                 email=options['email'],
-                password=options['password'],
                 first_name=options['first_name'],
                 last_name=options['last_name'],
-                role=default_role
+                role=default_role,
+                is_superuser=options['is_superuser'],
+                is_staff=options['is_superuser']
             )
-            self.stdout.write(self.style.SUCCESS(f'Created test user: {username}'))
+            user.set_password(options['password'])
+            user.save()
+            
+            if options['is_superuser']:
+                self.stdout.write(self.style.SUCCESS(f'Created superuser: {username}'))
+            else:
+                self.stdout.write(self.style.SUCCESS(f'Created test user: {username}'))
         else:
             self.stdout.write(self.style.WARNING(f'Test user {username} already exists'))
