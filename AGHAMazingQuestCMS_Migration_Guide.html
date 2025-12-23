@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGHAMazingQuestCMS Migration to Proxmox Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            background-color: white;
+            color: black;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #5d6d7e;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+        ul, ol {
+            padding-left: 30px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .note {
+            background-color: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fdf2e8;
+            border-left: 4px solid #e74c3c;
+            padding: 10px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>AGHAMazingQuestCMS Migration to Proxmox via Local Network</h1>
+    
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#preparation">Preparation Phase</a></li>
+        <li><a href="#migration">Migration Process</a></li>
+        <li><a href="#post-migration">Post-Migration Configuration</a></li>
+        <li><a href="#verification">Verification and Testing</a></li>
+        <li><a href="#security">Security Considerations</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+
+    <h2 id="overview">1. Overview</h2>
+    <p>This document provides a comprehensive guide for migrating the AGHAMazingQuestCMS application to a Proxmox environment via a local network connection. The AGHAMazingQuestCMS is a content management system built with React, Django, Wagtail, and PostgreSQL, deployed using Docker containers.</p>
+
+    <h2 id="prerequisites">2. Prerequisites</h2>
+    
+    <h3>Proxmox Server Requirements</h3>
+    <ul>
+        <li>Proxmox VE 7.0 or higher</li>
+        <li>Minimum 8GB RAM (16GB recommended)</li>
+        <li>Minimum 4 CPU cores (8 cores recommended)</li>
+        <li>Minimum 50GB available storage</li>
+        <li>Docker and Docker Compose installed on the target system</li>
+    </ul>
+
+    <h3>Network Requirements</h3>
+    <ul>
+        <li>Local network access to Proxmox server</li>
+        <li>Static IP address assignment capability</li>
+        <li>Ports 8080 and 5050 available for application access</li>
+    </ul>
+
+    <h3>Tools Required</h3>
+    <ul>
+        <li>Git client for repository cloning</li>
+        <li>SSH client for server access</li>
+        <li>SCP/SFTP client for file transfers (if not using Git)</li>
+    </ul>
+
+    <h2 id="preparation">3. Preparation Phase</h2>
+
+    <h3>Prepare Proxmox Environment</h3>
+    <ol>
+        <li>Create a new Linux container (LXC) or virtual machine (VM) with the following specifications:
+            <ul>
+                <li>4+ CPU cores</li>
+                <li>6+ GB RAM</li>
+                <li>20+ GB storage</li>
+                <li>Debian 11 or Ubuntu 22.04 LTS base system</li>
+            </ul>
+        </li>
+        <li>Install Docker and Docker Compose in the container/VM:
+            <pre>apt update
+apt install -y docker.io
+systemctl enable docker
+systemctl start docker
+
+# Install Docker Compose
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose</pre>
+        </li>
+    </ol>
+
+    <h3>Verify Prerequisites</h3>
+    <p>Run the following commands to verify Docker and Docker Compose are properly installed:</p>
+    <pre>docker --version
+docker-compose --version</pre>
+
+    <h2 id="migration">4. Migration Process</h2>
+
+    <h3>Transfer Project Files</h3>
+    <p>Choose one of the following methods to transfer the project to your Proxmox environment:</p>
+
+    <h4>Method A: Git Clone (Recommended)</h4>
+    <pre># Connect to your Proxmox container/VM via SSH
+ssh user@proxmox-server-ip
+
+# Navigate to home directory
+cd ~
+
+# Clone the repository
+git clone https://github.com/your-username/AGHAMazingQuestCMS.git
+cd AGHAMazingQuestCMS</pre>
+
+    <h4>Method B: Archive Transfer</h4>
+    <pre># On your local machine, create an archive
+tar -czf aghamazingquestcms.tar.gz --exclude='.git' AGHAMazingQuestCMS/
+
+# Transfer the archive to Proxmox via SCP
+scp aghamazingquestcms.tar.gz user@proxmox-server-ip:/path/to/destination/
+
+# On Proxmox, extract the archive
+tar -xzf aghamazingquestcms.tar.gz</pre>
+
+    <h3>Environment Configuration</h3>
+
+    <h4>Copy and Modify Environment Variables</h4>
+    <pre>cd AGHAMazingQuestCMS
+cp .env.example .env</pre>
+
+    <p>Edit the .env file to match your Proxmox environment:</p>
+    <pre>nano .env</pre>
+
+    <p>Key values to update:</p>
+    <pre>DJANGO_SECRET_KEY=your-new-generated-secret-key
+DB_PASSWORD=your-secure-db-password
+PGADMIN_DEFAULT_PASSWORD=your-secure-pgadmin-password
+DJANGO_ALLOWED_HOSTS=your-proxmox-ip,localhost,127.0.0.1
+CSRF_TRUSTED_ORIGINS=http://your-proxmox-ip:8080
+DJANGO_DEBUG=False</pre>
+
+    <h4>Generate a New Secret Key</h4>
+    <pre>python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'</pre>
+
+    <h3>Network Configuration</h3>
+    <p>Update the Nginx configuration to reflect your Proxmox server's IP address:</p>
+    <pre>nano deployment/deploy/nginx.conf</pre>
+
+    <p>Replace hosting-pc.tail013787.ts.net with your Proxmox server IP address:</p>
+    <pre>server {
+    listen 80;
+    server_name YOUR_PROXMOX_IP_ADDRESS;
+
+    # ... rest of the configuration remains the same
+}</pre>
+
+    <h3>Build and Deploy Application</h3>
+    <p>Navigate to the deployment directory and start the services:</p>
+    <pre>cd deployment
+docker-compose up --build -d</pre>
+
+    <p>This command will:</p>
+    <ul>
+        <li>Build the application image from the Dockerfile</li>
+        <li>Start all required services (PostgreSQL, Django/Wagtail, Nginx, pgAdmin)</li>
+        <li>Run the services in detached mode</li>
+    </ul>
+
+    <h2 id="post-migration">5. Post-Migration Configuration</h2>
+
+    <h3>Wait for Services to Initialize</h3>
+    <p>Allow 2-3 minutes for all services to start completely:</p>
+    <pre># Check running containers
+docker-compose ps
+
+# View logs if needed
+docker-compose logs web
+docker-compose logs db</pre>
+
+    <h3>Configure Firewall (if applicable)</h3>
+    <p>If your Proxmox host has a firewall enabled, open required ports:</p>
+    <pre># Using ufw (Uncomplicated Firewall)
+ufw allow 8080
+ufw allow 5050
+
+# Or using iptables directly
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+iptables -A INPUT -p tcp --dport 5050 -j ACCEPT</pre>
+
+    <h3>Update DNS/Network Configuration</h3>
+    <p>If using a domain name, update your DNS records to point to your Proxmox server IP address.</p>
+
+    <h2 id="verification">6. Verification and Testing</h2>
+
+    <h3>Verify Service Status</h3>
+    <p>Check that all containers are running properly:</p>
+    <pre>docker-compose ps</pre>
+
+    <p>Expected output should show all services as "Up" (possibly with "healthy" status for the database).</p>
+
+    <h3>Test Application Access</h3>
+    <p>Access the following URLs from your local network:</p>
+    <ul>
+        <li>Main Application: <code>http://YOUR_PROXMOX_IP:8080</code></li>
+        <li>Django Admin: <code>http://YOUR_PROXMOX_IP:8080/admin/</code></li>
+        <li>Wagtail CMS: <code>http://YOUR_PROXMOX_IP:8080/cms/</code></li>
+        <li>pgAdmin: <code>http://YOUR_PROXMOX_IP:5050</code></li>
+    </ul>
+
+    <h3>Test Default Credentials</h3>
+    <p>Use the default credentials to access the admin interfaces:</p>
+
+    <h4>Django Admin:</h4>
+    <ul>
+        <li>Username: admin</li>
+        <li>Password: admin123</li>
+        <li>Email: admin@example.com</li>
+    </ul>
+
+    <h4>Wagtail CMS:</h4>
+    <ul>
+        <li>Username: admin</li>
+        <li>Password: admin123</li>
+    </ul>
+
+    <h4>pgAdmin:</h4>
+    <ul>
+        <li>Email: admin@example.com</li>
+        <li>Password: Value set in your PGADMIN_DEFAULT_PASSWORD environment variable</li>
+    </ul>
+
+    <h3>Create Superuser (Optional)</h3>
+    <p>If needed, create a new superuser with custom credentials:</p>
+    <pre># Access the web container
+docker-compose exec web bash
+
+# Create a superuser
+python manage.py createsuperuser --email admin@yourdomain.com --username adminuser</pre>
+
+    <h2 id="security">7. Security Considerations</h2>
+
+    <h3>Immediate Security Actions</h3>
+    <ol>
+        <li><strong>Change Default Passwords</strong>: Immediately change all default passwords after initial access</li>
+        <li><strong>Enable HTTPS</strong>: Configure SSL certificates for secure connections</li>
+        <li><strong>Restrict Database Access</strong>: Ensure PostgreSQL is not exposed to external networks</li>
+        <li><strong>Update Firewall Rules</strong>: Limit access to necessary IP ranges only</li>
+    </ol>
+
+    <h3>Recommended Security Enhancements</h3>
+    <ol>
+        <li><strong>Use Reverse Proxy with SSL</strong>:
+            <ul>
+                <li>Configure Nginx to use SSL certificates</li>
+                <li>Redirect HTTP traffic to HTTPS</li>
+            </ul>
+        </li>
+        <li><strong>Database Security</strong>:
+            <ul>
+                <li>Regular backups of the PostgreSQL database</li>
+                <li>Strong passwords for database access</li>
+                <li>Limit database access to internal network only</li>
+            </ul>
+        </li>
+        <li><strong>Application Security</strong>:
+            <ul>
+                <li>Set <code>DJANGO_DEBUG=False</code> in production</li>
+                <li>Regular updates of dependencies</li>
+                <li>Monitor access logs</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2 id="troubleshooting">8. Troubleshooting</h2>
+
+    <h3>Common Issues and Solutions</h3>
+
+    <h4>1. Application Not Loading</h4>
+    <ul>
+        <li>Check container status: <code>docker-compose ps</code></li>
+        <li>View logs: <code>docker-compose logs web</code></li>
+        <li>Verify network connectivity and firewall settings</li>
+    </ul>
+
+    <h4>2. Database Connection Errors</h4>
+    <ul>
+        <li>Ensure the database container is healthy: <code>docker-compose ps</code></li>
+        <li>Check environment variables are correctly set</li>
+        <li>Verify database service is running: <code>docker-compose logs db</code></li>
+    </ul>
+
+    <h4>3. Static Files Not Loading</h4>
+    <ul>
+        <li>Confirm Django has collected static files: <code>docker-compose exec web python manage.py collectstatic --noinput</code></li>
+        <li>Check Nginx configuration for static file paths</li>
+    </ul>
+
+    <h4>4. Permission Issues</h4>
+    <ul>
+        <li>Verify file ownership and permissions in the container</li>
+        <li>Ensure the application can write to media and static directories</li>
+    </ul>
+
+    <h4>5. Port Conflicts</h4>
+    <ul>
+        <li>Check if ports 8080 and 5050 are available: <code>netstat -tuln | grep -E ':(8080|5050)'</code></li>
+        <li>Change ports in docker-compose.yml if needed</li>
+    </ul>
+
+    <h3>Restart Services</h3>
+    <pre># Stop all services
+docker-compose down
+
+# Start all services again
+docker-compose up --build -d</pre>
+
+    <h3>Access Container Shell</h3>
+    <pre># Access the web application container
+docker-compose exec web bash
+
+# Access the database container
+docker-compose exec db bash
+
+# Access the nginx container
+docker-compose exec nginx bash</pre>
+
+    <h2>Maintenance</h2>
+
+    <h3>Regular Maintenance Tasks</h3>
+
+    <h4>1. Backups</h4>
+    <p>Regularly backup the PostgreSQL database:</p>
+    <pre>docker-compose exec db pg_dump -U admin agha_db > backup_$(date +%Y%m%d_%H%M%S).sql</pre>
+
+    <h4>2. Updates</h4>
+    <p>Keep the application updated by pulling the latest code and rebuilding:</p>
+    <pre>git pull origin main
+docker-compose build --no-cache
+docker-compose up -d</pre>
+
+    <h4>3. Logs Monitoring</h4>
+    <p>Regularly check application logs for errors:</p>
+    <pre>docker-compose logs --tail=100 -f web</pre>
+
+    <h2>Conclusion</h2>
+    <p>This migration guide provides a complete process for deploying the AGHAMazingQuestCMS application to a Proxmox environment. The containerized nature of the application makes it ideal for Proxmox deployment, providing isolation, scalability, and easy management.</p>
+
+    <p>After successful migration, ensure to implement security best practices and establish a regular backup schedule to protect your content and data.</p>
+</body>
+</html>

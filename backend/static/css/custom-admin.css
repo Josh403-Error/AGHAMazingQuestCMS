@@ -1,0 +1,231 @@
+/* Custom Wagtail Admin CSS for AGHAMazing Quest CMS */
+/* Based on DOST-STII Brand Guide colors */
+
+/* Primary Colors */
+:root {
+  --yale-blue: #004A98;      /* Yale Blue - Primary color */
+  --white: #FFFFFF;           /* White - Secondary color */
+  --red-pigment: #ED262A;    /* Red Pigment - Accent color */
+  --eerie-black: #1E1E1E;    /* Eerie Black - Dark text */
+}
+
+/* Main header and branding */
+.w-header {
+  background: var(--yale-blue) !important;
+  border-bottom: 2px solid var(--eerie-black) !important;
+}
+
+/* Site name and branding */
+.w-sitename {
+  color: var(--white) !important;
+  font-weight: bold !important;
+  font-size: 1.4em !important;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+}
+
+.w-sitename::before {
+  content: "AGHAMazing Quest CMS" !important;
+}
+
+/* Main navigation */
+.w-nav-main a,
+.w-nav-main a:link,
+.w-nav-main a:visited {
+  color: var(--white) !important;
+}
+
+.w-nav-main a:hover,
+.w-nav-main a:active {
+  background: var(--red-pigment) !important;
+  color: var(--white) !important;
+}
+
+.w-nav-main .current {
+  background: var(--red-pigment) !important;
+}
+
+/* Breadcrumbs */
+.w-header-breadcrumb a {
+  color: var(--yale-blue) !important;
+}
+
+.w-header-breadcrumb a:hover {
+  color: var(--red-pigment) !important;
+}
+
+/* Buttons and controls */
+.button,
+.c-button,
+.w-button,
+input[type="submit"],
+input[type="button"],
+.button-secondary {
+  background-color: var(--yale-blue) !important;
+  border-color: var(--yale-blue) !important;
+  color: var(--white) !important;
+  border-radius: 4px !important;
+}
+
+.button:hover,
+.c-button:hover,
+.w-button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  background-color: var(--red-pigment) !important;
+  border-color: var(--red-pigment) !important;
+  color: var(--white) !important;
+}
+
+/* Main content area */
+.w-panel-main,
+.w-main {
+  background-color: var(--white) !important;
+}
+
+/* Tables and lists */
+.w-slim-header th {
+  background-color: var(--yale-blue) !important;
+  color: var(--white) !important;
+}
+
+.w-slim-header {
+  background-color: var(--white) !important;
+  color: var(--eerie-black) !important;
+}
+
+.w-table--striped tbody tr:nth-child(even) {
+  background-color: #f8f9fa !important;
+}
+
+/* Forms and inputs */
+.w-field input,
+.w-field textarea,
+.w-field select {
+  border: 1px solid var(--yale-blue) !important;
+  border-radius: 4px !important;
+}
+
+.w-field input:focus,
+.w-field textarea:focus,
+.w-field select:focus {
+  border-color: var(--red-pigment) !important;
+  box-shadow: 0 0 0 2px rgba(237, 38, 42, 0.2) !important;
+}
+
+/* Footer */
+footer,
+.w-footer {
+  background-color: var(--eerie-black) !important;
+  color: var(--white) !important;
+  padding: 1rem !important;
+  text-align: center !important;
+}
+
+footer a,
+.w-footer a {
+  color: var(--white) !important;
+}
+
+footer a:hover,
+.w-footer a:hover {
+  color: var(--red-pigment) !important;
+}
+
+/* Add custom footer content */
+.w-footer::after {
+  content: "AGHAMazing Quest CMS - Powered by DOST-STII" !important;
+  display: block !important;
+  margin-top: 0.5rem !important;
+}
+
+/* Status tags and indicators */
+.status-tag {
+  background-color: var(--yale-blue) !important;
+  color: var(--white) !important;
+}
+
+.status-tag.warning {
+  background-color: var(--red-pigment) !important;
+}
+
+/* Focus and selection states */
+*:focus {
+  outline-color: var(--red-pigment) !important;
+}
+
+/* Custom sidebar styling */
+.w-nav-sidebar,
+.w-sidebar {
+  background-color: var(--white) !important;
+  border-right: 2px solid var(--yale-blue) !important;
+}
+
+/* Page titles */
+h1,
+h2,
+h3 {
+  color: var(--yale-blue) !important;
+}
+
+/* Help text */
+.w-help-block,
+.help-block {
+  color: var(--red-pigment) !important;
+}
+
+/* Wagtail logo replacement */
+.w-header__logo {
+  background-image: url('/static/images/dost-stii-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 60px !important;
+  min-height: 50px !important;
+}
+
+/* Custom logo styling for sidebar */
+.w-nav-drawer .sidebar__logo {
+  background-image: url('/static/images/dost-stii-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 60px;
+  margin: 10px 0;
+}
+
+/* Page editor styling */
+.w-panel .c-sf-block__content,
+.w-panel .c-sf-block__header {
+  border: 1px solid var(--yale-blue) !important;
+}
+
+/* Rich text editor toolbar */
+. DraftEditor-root {
+  border: 1px solid var(--yale-blue) !important;
+  border-radius: 4px !important;
+}
+
+/* Wagtail icons */
+.icon.icon-cog {
+  background-color: var(--yale-blue) !important;
+}
+
+/* Background with ripple effect */
+body {
+  background-color: var(--white) !important;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(0, 74, 152, 0.05) 0%, transparent 15%),
+    radial-gradient(circle at 90% 80%, rgba(237, 38, 42, 0.05) 0%, transparent 15%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .w-header__logo {
+    padding-left: 50px !important;
+  }
+  
+  .w-sitename {
+    font-size: 1.2em !important;
+  }
+}

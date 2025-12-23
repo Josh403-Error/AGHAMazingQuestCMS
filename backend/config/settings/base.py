@@ -117,17 +117,26 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
+    'rest_framework.authtoken',
 
     # Your apps
     'apps.authentication',
     'apps.contentmanagement',
     'apps.usermanagement',
     'apps.analyticsmanagement',
+    'apps.api',  # Unified API app
+    'apps.branding',  # Branding customization app
 ]
+
+# Conditionally add debug toolbar when DEBUG is True
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
 
 MIDDLEWARE = [
     # CORS middleware should be placed as high as possible
     'corsheaders.middleware.CorsMiddleware',
+    # Debug toolbar middleware should be placed early for full coverage
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -275,11 +284,20 @@ CORS_ALLOW_CREDENTIALS = True
 # Django REST Framework + Simple JWT configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20
 }
 
 # CSRF trusted origins allow safe cross-origin POST requests without failing CSRF validation.
@@ -347,3 +365,10 @@ if not DEBUG:
     if os.environ.get('DJANGO_DEBUG', 'False').lower() != 'true':
         DEBUG = False
 
+# Debug toolbar configuration
+if DEBUG:
+    # Required for Django Debug Toolbar to work properly
+    INTERNAL_IPS = [
+        '127.0.0.1',
+        'localhost',
+    ]

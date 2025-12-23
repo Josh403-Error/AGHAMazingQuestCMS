@@ -1,4 +1,3 @@
-# Custom hooks to customize Wagtail admin for AGHAMazing Quest CMS
 from django.templatetags.static import static
 from django.utils.html import format_html
 from wagtail import hooks
@@ -16,22 +15,6 @@ def global_admin_js():
     return format_html('<script src="{}"></script>', static('js/custom-admin.js'))
 
 
-@hooks.register('construct_main_menu')
-def modify_content_management_menu(request, menu_items, all_permissions):
-    """Modify menu items to reflect AGHAMazing Quest CMS branding"""
-    # You can customize menu items here if needed
-    pass
-
-
-@hooks.register('construct_homepage')
-def modify_homepage_panels(request, panels):
-    """Modify homepage panels to reflect AGHAMazing Quest CMS branding"""
-    for panel in panels:
-        # You can customize homepage panels here if needed
-        pass
-
-
-# Register a custom menu item for branding
 @hooks.register('register_admin_menu_item')
 def register_branding_menu_item():
     """Add a custom menu item for branding"""
@@ -46,8 +29,14 @@ def register_branding_menu_item():
     )
 
 
-# Custom branding JavaScript
-@hooks.register('insert_editor_js')
-def editor_js():
-    """Add custom JavaScript to the page editor"""
-    return format_html('<script src="{}"></script>', static('js/custom-admin.js'))
+@hooks.register('construct_homepage')
+def modify_homepage(request, context):
+    """Modify the Wagtail admin homepage to reflect AGHAMazing Quest branding"""
+    # Customize the homepage context here if needed
+    pass
+
+
+@hooks.register('insert_editor_css')
+def editor_css():
+    """Add custom CSS to the page editor interface"""
+    return format_html('<link rel="stylesheet" href="{}">', static('css/custom-admin.css'))

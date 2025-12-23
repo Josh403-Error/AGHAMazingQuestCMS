@@ -1,5 +1,5 @@
 """
-Main URL configuration for the unified headless CMS
+Unified URL configuration for the headless CMS
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -8,6 +8,7 @@ from django.conf.urls.static import static
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     # Django Admin
@@ -17,10 +18,7 @@ urlpatterns = [
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
     
-    # API endpoints
-    path('api/', include('apps.api.urls')),
-    
-    # Legacy app URLs (for compatibility)
+    # Core app URLs
     path('api/auth/', include('apps.authentication.urls')),
     path('api/content/', include('apps.contentmanagement.urls')),
     path('api/users/', include('apps.usermanagement.urls')),

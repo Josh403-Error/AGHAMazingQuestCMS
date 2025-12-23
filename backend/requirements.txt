@@ -6,3 +6,5 @@ django-cors-headers
 pymysql
 psycopg2-binary
 gunicorn
+django-filter
+django-debug-toolbar
