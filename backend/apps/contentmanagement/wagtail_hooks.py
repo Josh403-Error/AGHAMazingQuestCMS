@@ -17,7 +17,7 @@ def global_admin_js():
 
 
 @hooks.register('construct_main_menu')
-def modify_content_management_menu(request, menu_items, all_permissions):
+def modify_content_management_menu(request, menu_items, all_permissions=None):
     """Modify menu items to reflect AGHAMazing Quest CMS branding"""
     # You can customize menu items here if needed
     pass
@@ -29,21 +29,6 @@ def modify_homepage_panels(request, panels):
     for panel in panels:
         # You can customize homepage panels here if needed
         pass
-
-
-# Register a custom menu item for branding
-@hooks.register('register_admin_menu_item')
-def register_branding_menu_item():
-    """Add a custom menu item for branding"""
-    from wagtail.admin.menu import MenuItem
-    from django.urls import reverse
-    
-    return MenuItem(
-        'AGHAMazing Quest CMS',
-        reverse('wagtailadmin_home'),
-        classname='icon icon-cog',  # Changed from 'classnames' to 'classname'
-        order=1000
-    )
 
 
 # Custom branding JavaScript
