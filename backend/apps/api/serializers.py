@@ -5,7 +5,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from apps.usermanagement.models import Role
 from apps.contentmanagement.models import Content
-from apps.analyticsmanagement.models import Analytics
+# from apps.analyticsmanagement.models import Analytics  # Removed since model doesn't exist
 
 User = get_user_model()
 
@@ -46,10 +46,10 @@ class ContentSerializer(serializers.ModelSerializer):
         return f"{obj.author.first_name} {obj.author.last_name}"
 
 
-class AnalyticsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Analytics
-        fields = '__all__'
+# class AnalyticsSerializer(serializers.ModelSerializer):  # Removed since model doesn't exist
+#     class Meta:
+#         model = Analytics
+#         fields = '__all__'
 
 
 # Detailed serializers for specific use cases

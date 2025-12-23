@@ -1,0 +1,40 @@
+{% extends "wagtailadmin/base.html" %}
+
+{% load wagtailadmin_tags %}
+{% load i18n %}
+{% load l10n %}
+{% load static %}
+
+{% block branding_favicon %}
+    <link rel="shortcut icon" type="image/png" href="{% versioned_static 'wagtailadmin/images/wagtail-logo.svg' %}">
+{% endblock %}
+
+{% block branding_title %}AGHAMazing Quest CMS{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/admin/custom-admin.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        // Add any custom admin JavaScript here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add custom behavior if needed
+            console.log('AGHAMazing Quest CMS loaded');
+        });
+    </script>
+{% endblock %}
+
+{% block body_class %}{{ block.super }} custom-admin-theme{% endblock %}
+
+{% block header %}
+    {% include "wagtailadmin/shared/admin_header.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        {% block content_main %}{% endblock %}
+    </div>
+{% endblock %}

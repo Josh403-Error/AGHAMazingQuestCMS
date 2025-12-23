@@ -1,26 +1,78 @@
 from django.contrib import admin
-from .models import Analytics
+from .models import PageView, ContentInteraction, UserActivity, AnalyticsDashboardPage
 
 
-@admin.register(Analytics)
-class AnalyticsAdmin(admin.ModelAdmin):
-    list_display = ('metric_name', 'metric_type', 'user', 'content', 'timestamp')
-    list_filter = ('metric_type', 'timestamp', 'created_at')
-    search_fields = ('metric_name', 'metric_value')
-    readonly_fields = ('id', 'created_at', 'updated_at')
+@admin.register(PageView)
+class PageViewAdmin(admin.ModelAdmin):
+    list_display = ('page', 'user', 'timestamp', 'ip_address')
+    list_filter = ('timestamp', 'page')
+    search_fields = ('ip_address', 'user__username')
+    readonly_fields = ('timestamp',)
     
     fieldsets = (
         (None, {
-            'fields': ('metric_name', 'metric_value', 'metric_type')
+            'fields': ('page', 'user', 'session_key')
         }),
-        ('Relationships', {
-            'fields': ('user', 'content')
+        ('Request Information', {
+            'fields': ('ip_address', 'user_agent')
+        }),
+        ('Timestamp', {
+            'fields': ('timestamp',)
+        }),
+    )
+
+
+@admin.register(ContentInteraction)
+class ContentInteractionAdmin(admin.ModelAdmin):
+    list_display = ('content_type', 'content_id', 'user', 'action', 'timestamp')
+    list_filter = ('content_type', 'action', 'timestamp')
+    search_fields = ('content_type', 'action', 'user__username')
+    readonly_fields = ('timestamp',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('content_type', 'content_id', 'action')
+        }),
+        ('User', {
+            'fields': ('user',)
         }),
         ('Metadata', {
             'fields': ('metadata',)
         }),
-        ('Timestamps', {
-            'fields': ('timestamp', 'created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('Timestamp', {
+            'fields': ('timestamp',)
+        }),
+    )
+
+
+@admin.register(UserActivity)
+class UserActivityAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'timestamp')
+    list_filter = ('action', 'timestamp', 'user__username')
+    search_fields = ('action', 'user__username', 'user__email')
+    readonly_fields = ('timestamp',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'action')
+        }),
+        ('Details', {
+            'fields': ('details',)
+        }),
+        ('Timestamp', {
+            'fields': ('timestamp',)
+        }),
+    )
+
+
+@admin.register(AnalyticsDashboardPage)
+class AnalyticsDashboardPageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'first_published_at')
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'slug', 'live', 'has_unpublished_changes')
+        }),
+        ('Content', {
+            'fields': ('intro', 'content')
         }),
     )

@@ -13,9 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
         el.textContent = 'DOST-STII Content Management System';
     });
     
-    // Add custom branding to the footer
+    // Remove any existing branding text to avoid duplication
+    const existingBranding = document.querySelector('.agh-branding-text');
+    if (existingBranding) {
+        existingBranding.remove();
+    }
+    
+    // Add custom branding to the footer only if it doesn't already exist
     const footer = document.querySelector('footer') || document.querySelector('.w-footer');
-    if (footer) {
+    if (footer && !existingBranding) {
         const brandingText = document.createElement('div');
         brandingText.className = 'agh-branding-text';
         brandingText.textContent = 'AGHAMazing Quest CMS - Powered by DOST-STII';

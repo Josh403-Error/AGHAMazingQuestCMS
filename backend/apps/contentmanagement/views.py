@@ -1,140 +1,189 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count, Q
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import (
-    Content, ContentCategory, ContentAnalytics, ContentApproval,
-    MediaLibrary, ContentMedia, Challenge, Marker,
-    ChallengeProgress, Feedback, ChatSession
+    Content, ContentCategory, ContentAnalytics, ContentApproval, 
+    MediaLibrary, ContentMedia, Challenge, Marker, ChallengeProgress, 
+    Feedback, ChatSession
 )
-from apps.usermanagement.models import User
 from .serializers import (
     ContentSerializer, ContentCategorySerializer, ContentAnalyticsSerializer,
     ContentApprovalSerializer, MediaLibrarySerializer, ContentMediaSerializer,
     ChallengeSerializer, MarkerSerializer, ChallengeProgressSerializer,
     FeedbackSerializer, ChatSessionSerializer
 )
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+# from .permissions import IsOwnerOrReadOnly  # Removed since it doesn't exist
+from apps.analyticsmanagement.models import UserActivity, PageView
 
-
-class IsAdminOrSuperuser(IsAuthenticated):
-    def has_permission(self, request, view):
-        if not super().has_permission(request, view):
-            return False
-        # Allow only superusers or users in Admin/Super Admin groups
-        if request.user.is_superuser:
-            return True
-        # Check user role
-        if hasattr(request.user, 'role') and request.user.role:
-            return request.user.role.name in ['Admin', 'Super Admin']
-        return False
+User = get_user_model()
 
 
 class ContentViewSet(viewsets.ModelViewSet):
-    queryset = Content.objects.filter(deleted_at__isnull=True)
+    queryset = Content.objects.all()
     serializer_class = ContentSerializer
-    permission_classes = [IsAdminOrSuperuser]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'content_type', 'author']
-    search_fields = ['title', 'body']
-    ordering_fields = ['created_at', 'updated_at', 'title']
-    ordering = ['-created_at']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Only allow users to see their own content if not staff
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(author=self.request.user)
+        return queryset.filter(deleted_at__isnull=True)
 
     def perform_create(self, serializer):
-        # Set the author to the current user
-        serializer.save(author=self.request.user)
-
-    @action(detail=True, methods=['post'])
-    def publish(self, request, pk=None):
-        content = self.get_object()
-        content.status = 'approved'
-        content.published_at = timezone.now()
-        content.save()
-        return Response({'status': 'published'})
-
-    @action(detail=True, methods=['post'])
-    def soft_delete(self, request, pk=None):
-        content = self.get_object()
-        content.soft_delete()
-        return Response({'status': 'deleted'})
-
-    @action(detail=True, methods=['post'], url_path='approve')
-    def approve_content(self, request, pk=None):
-        content = self.get_object()
-        content.status = 'approved'
-        content.approved_at = timezone.now()
-        content.save()
-        return Response({'status': 'approved'})
-
-    @action(detail=True, methods=['post'], url_path='deny')
-    def deny_content(self, request, pk=None):
-        content = self.get_object()
-        content.status = 'denied'
-        content.denied_at = timezone.now()
-        content.save()
-        return Response({'status': 'denied'})
+        # Create a ContentAnalytics object first
+        analytics = ContentAnalytics.objects.create()
+        # Save the content with the author and analytics
+        serializer.save(author=self.request.user, analytics=analytics)
 
 
 class ContentCategoryViewSet(viewsets.ModelViewSet):
-    queryset = ContentCategory.objects.filter(deleted_at__isnull=True)
+    queryset = ContentCategory.objects.all()
     serializer_class = ContentCategorySerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ContentAnalyticsViewSet(viewsets.ModelViewSet):
     queryset = ContentAnalytics.objects.all()
     serializer_class = ContentAnalyticsSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ContentApprovalViewSet(viewsets.ModelViewSet):
-    queryset = ContentApproval.objects.filter(deleted_at__isnull=True)
+    queryset = ContentApproval.objects.all()
     serializer_class = ContentApprovalSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Approver can only see content assigned to them
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(approver=self.request.user)
+        return queryset
 
 
 class MediaLibraryViewSet(viewsets.ModelViewSet):
-    queryset = MediaLibrary.objects.filter(deleted_at__isnull=True)
+    queryset = MediaLibrary.objects.all()
     serializer_class = MediaLibrarySerializer
-    permission_classes = [IsAdminOrSuperuser]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['file_name', 'description']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(uploader=self.request.user)
 
 
 class ContentMediaViewSet(viewsets.ModelViewSet):
     queryset = ContentMedia.objects.all()
     serializer_class = ContentMediaSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ChallengeViewSet(viewsets.ModelViewSet):
-    queryset = Challenge.objects.filter(deleted_at__isnull=True)
+    queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class MarkerViewSet(viewsets.ModelViewSet):
-    queryset = Marker.objects.filter(deleted_at__isnull=True)
+    queryset = Marker.objects.all()
     serializer_class = MarkerSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ChallengeProgressViewSet(viewsets.ModelViewSet):
     queryset = ChallengeProgress.objects.all()
     serializer_class = ChallengeProgressSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Users can only see their own progress
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
-    queryset = Feedback.objects.filter(deleted_at__isnull=True)
+    queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ChatSessionViewSet(viewsets.ModelViewSet):
-    queryset = ChatSession.objects.filter(deleted_at__isnull=True)
+    queryset = ChatSession.objects.all()
     serializer_class = ChatSessionSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Users can only see their own chat sessions
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset
+
+
+@login_required
+def custom_dashboard(request):
+    """
+    Custom dashboard view with analytics and content stats
+    """
+    # Get content stats
+    total_content_count = Content.objects.filter(deleted_at__isnull=True).count()
+    
+    # Content status breakdown
+    content_status = Content.objects.filter(
+        deleted_at__isnull=True
+    ).values('status').annotate(count=Count('status'))
+    
+    # Calculate percentages for content status
+    content_status_list = []
+    for item in content_status:
+        status_name = item['status']
+        count = item['count']
+        percentage = 0
+        if total_content_count > 0:
+            percentage = round((count / total_content_count) * 100, 2)
+        content_status_list.append({
+            'status': status_name,
+            'count': count,
+            'percentage': percentage
+        })
+    
+    # User stats
+    total_users_count = User.objects.count()
+    
+    # Pending reviews
+    pending_reviews_count = Content.objects.filter(
+        status__in=['pending_review', 'reviewed']
+    ).count()
+    
+    # Page views this month
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    page_views_count = PageView.objects.filter(
+        timestamp__gte=thirty_days_ago
+    ).count()
+    
+    # Recent activities
+    recent_activities = UserActivity.objects.select_related('user').order_by('-timestamp')[:10]
+    
+    context = {
+        'total_content_count': total_content_count,
+        'total_users_count': total_users_count,
+        'pending_reviews_count': pending_reviews_count,
+        'page_views_count': page_views_count,
+        'content_status_list': content_status_list,
+        'recent_activities': recent_activities,
+    }
+    
+    return render(request, 'wagtail/admin/dashboard.html', context)

@@ -1,0 +1,70 @@
+{% extends "wagtailadmin/base.html" %}
+{% load wagtailadmin_tags static %}
+
+{% block title %}Sign in to AGHAMazing Quest CMS{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+        .login-form .button, 
+        .login-form input[type="submit"] {
+            background: #004A98 !important; /* Yale Blue */
+            border: 2px solid #004A98 !important; /* Yale Blue border */
+            box-shadow: 0 2px 4px rgba(0, 74, 152, 0.3) !important; /* Subtle shadow using Yale Blue */
+            transition: all 0.3s ease !important;
+            text-shadow: none !important;
+        }
+        
+        .login-form .button:hover, 
+        .login-form input[type="submit"]:hover {
+            background: #ED262A !important; /* Red Pigment on hover */
+            border: 2px solid #ED262A !important; /* Red Pigment border on hover */
+            box-shadow: 0 4px 8px rgba(237, 38, 42, 0.4) !important; /* Red shadow on hover */
+        }
+        
+        .login-form .button:active, 
+        .login-form input[type="submit"]:active {
+            transform: translateY(1px) !important;
+            box-shadow: 0 1px 2px rgba(0, 74, 152, 0.3) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <main class="login">
+            <div class="row">
+                <div class="col12">
+                    <header class="merged">
+                        <h1>{% block branding_login %}Sign in to AGHAMazing Quest CMS{% endblock %}</h1>
+                    </header>
+                </div>
+            </div>
+            
+            <form class="login-form" action="{% url 'wagtailadmin_login' %}" method="post">
+                {% csrf_token %}
+                
+                {% if form.errors and not form.this_is_the_login_form.errors %}
+                    <div class="form-response error">
+                        <p>
+                            {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+                
+                <div class="fields">
+                    {% include "wagtailadmin/shared/field_as_div.html" with field=form.username %}
+                    {% include "wagtailadmin/shared/field_as_div.html" with field=form.password %}
+                    
+                    {% if form.next %}
+                        <input type="hidden" name="next" value="{{ form.next.value }}" />
+                    {% endif %}
+                </div>
+                
+                <div class="submit">
+                    <input type="submit" value="{% trans 'Sign in' %}" class="button">
+                </div>
+            </form>
+        </main>
+    </div>
+{% endblock %}

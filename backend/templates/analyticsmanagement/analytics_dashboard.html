@@ -1,0 +1,222 @@
+{% extends "wagtailadmin/base.html" %}
+{% load wagtailadmin_tags %}
+{% load i18n %}
+
+{% block titletag %}{% trans "Analytics Dashboard" %}{% endblock %}
+
+{% block content %}
+    {% trans "Analytics Dashboard" as header_title %}
+    {% include "wagtailadmin/shared/header.html" with title=header_title %}
+
+    <div class="nice-padding">
+        <div class="container">
+            <div class="row">
+                <!-- Summary Cards -->
+                <div class="col6">
+                    <div class="panel summary-card">
+                        <div class="panel-header">
+                            <h3>Total Page Views</h3>
+                        </div>
+                        <div class="panel-content">
+                            <div class="metric">{{ analytics_data.total_views }}</div>
+                            <p class="metric-desc">Views in the last 30 days</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col6">
+                    <div class="panel summary-card">
+                        <div class="panel-header">
+                            <h3>Unique Visitors</h3>
+                        </div>
+                        <div class="panel-content">
+                            <div class="metric">{{ analytics_data.unique_visitors }}</div>
+                            <p class="metric-desc">Unique visitors in the last 30 days</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col6">
+                    <div class="panel summary-card">
+                        <div class="panel-header">
+                            <h3>Total Activities</h3>
+                        </div>
+                        <div class="panel-content">
+                            <div class="metric">{{ analytics_data.total_activities }}</div>
+                            <p class="metric-desc">User activities in the last 30 days</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col6">
+                    <div class="panel summary-card">
+                        <div class="panel-header">
+                            <h3>Content Interactions</h3>
+                        </div>
+                        <div class="panel-content">
+                            <div class="metric">{{ analytics_data.content_interactions|length }}</div>
+                            <p class="metric-desc">Types of content interactions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Charts Section -->
+                <div class="col12">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Activity Overview</h3>
+                        </div>
+                        <div class="panel-content">
+                            <canvas id="activityChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Top Pages and User Activity by Role -->
+                <div class="col6">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Top Pages</h3>
+                        </div>
+                        <div class="panel-content">
+                            <ul class="plain-list">
+                                {% for page in analytics_data.top_pages %}
+                                <li><strong>{{ page.page__title }}</strong> - {{ page.count }} views</li>
+                                {% empty %}
+                                <li>No page view data available</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col6">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>User Activity by Role</h3>
+                        </div>
+                        <div class="panel-content">
+                            <ul class="plain-list">
+                                {% for role in analytics_data.user_activity_by_role %}
+                                <li><strong>{{ role.user__groups__name|default:"No Role" }}</strong> - {{ role.count }} activities</li>
+                                {% empty %}
+                                <li>No role-based activity data available</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js for analytics visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prepare data for charts
+            const dailyActivities = {{ analytics_data.daily_activities|safe }};
+            const contentInteractions = {{ analytics_data.content_interactions|safe }};
+            
+            // Activity chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityChart = new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: dailyActivities.map(item => item.day),
+                    datasets: [{
+                        label: 'Daily Activities',
+                        data: dailyActivities.map(item => item.count),
+                        borderColor: '#004A98',
+                        backgroundColor: 'rgba(0, 74, 152, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Activities (Last 7 Days)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        .summary-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .panel-header {
+            background-color: #004A98;
+            color: white;
+            padding: 12px 16px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        
+        .panel-content {
+            padding: 20px;
+        }
+        
+        .metric {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #004A98;
+            text-align: center;
+        }
+        
+        .metric-desc {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .container {
+            max-width: 100%;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .col6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 10px;
+        }
+        
+        .col12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .col6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+{% endblock %}

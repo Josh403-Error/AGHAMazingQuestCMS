@@ -1,0 +1,180 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% load wagtailadmin_tags %}
+{% load static %}
+{% load dashboard_extras %}
+
+{% block titletag %}{% trans "Dashboard" %}{% endblock %}
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block content %}
+    <header class="w-header">
+        <div class="row">
+            <div class="left">
+                <div class="w-header__logo">
+                    <h1 class="w-header__logo-text">
+                        {% trans "AGHAMazing Quest CMS Dashboard" %}
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-content">
+        <div class="row">
+            <div class="col12">
+                <h2 class="w-header">{% trans "Welcome to AGHAMazing Quest CMS" %}</h2>
+                <p class="help-block">{% trans "Manage your content, monitor analytics, and collaborate with your team." %}</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <!-- Quick Stats -->
+            <div class="stat-card">
+                <div class="stat-card__icon bg-blue">
+                    <span class="icon icon-doc-full-inverse"></span>
+                </div>
+                <div class="stat-card__content">
+                    <h3 class="stat-card__title">{% trans "Total Content" %}</h3>
+                    <div class="stat-card__value">{{ total_content_count|default:0 }}</div>
+                    <div class="stat-card__label">{% trans "Published items" %}</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card__icon bg-green">
+                    <span class="icon icon-user"></span>
+                </div>
+                <div class="stat-card__content">
+                    <h3 class="stat-card__title">{% trans "Total Users" %}</h3>
+                    <div class="stat-card__value">{{ total_users_count|default:0 }}</div>
+                    <div class="stat-card__label">{% trans "Active accounts" %}</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card__icon bg-orange">
+                    <span class="icon icon-tick"></span>
+                </div>
+                <div class="stat-card__content">
+                    <h3 class="stat-card__title">{% trans "Pending Reviews" %}</h3>
+                    <div class="stat-card__value">{{ pending_reviews_count|default:0 }}</div>
+                    <div class="stat-card__label">{% trans "Awaiting approval" %}</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card__icon bg-purple">
+                    <span class="icon icon-view"></span>
+                </div>
+                <div class="stat-card__content">
+                    <h3 class="stat-card__title">{% trans "Page Views" %}</h3>
+                    <div class="stat-card__value">{{ page_views_count|default:0 }}</div>
+                    <div class="stat-card__label">{% trans "This month" %}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Activity -->
+            <div class="col6">
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-user">{% trans "Recent Activity" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        {% if recent_activities %}
+                            <div class="activity-timeline">
+                                {% for activity in recent_activities|slice:":5" %}
+                                    <div class="activity-item">
+                                        <div class="activity-user">
+                                            <span class="icon icon-user"></span>
+                                            <strong>{{ activity.user.get_full_name|default:activity.user.username }}</strong>
+                                        </div>
+                                        <div class="activity-action">{{ activity.action }}</div>
+                                        <div class="activity-time">{{ activity.timestamp|timesince }} ago</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="help-block">{% trans "No recent activity." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Status -->
+            <div class="col6">
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-doc-full-inverse">{% trans "Content Status" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        {% if content_status_list %}
+                            <div class="status-breakdown">
+                                {% for item in content_status_list %}
+                                    <div class="status-item">
+                                        <div class="status-header">
+                                            <span class="status-label {{ item.status }}">{{ item.status|title }}</span>
+                                            <span class="status-count">({{ item.count }} items)</span>
+                                        </div>
+                                        <div class="status-bar">
+                                            <div class="status-bar-fill" style="width: {{ item.percentage }}%"></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="help-block">{% trans "No content available." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions-section">
+            <div class="panel">
+                <div class="panel__header">
+                    <h2 class="panel__title icon icon-cogs">{% trans "Quick Actions" %}</h2>
+                </div>
+                <div class="panel__content">
+                    <div class="actions-grid">
+                        <a href="{% url 'wagtailadmin_pages:add_subpage' parent_page.id|default:2 %}" class="action-btn action-btn--primary">
+                            <span class="icon icon-plus"></span>
+                            <span class="action-text">{% trans "Create Content" %}</span>
+                        </a>
+                        
+                        <a href="{% url 'wagtailadmin_explore_root' %}" class="action-btn action-btn--secondary">
+                            <span class="icon icon-folder-open-inverse"></span>
+                            <span class="action-text">{% trans "Browse Content" %}</span>
+                        </a>
+                        
+                        <a href="{% url 'wagtailimages:index' %}" class="action-btn action-btn--secondary">
+                            <span class="icon icon-image"></span>
+                            <span class="action-text">{% trans "Manage Media" %}</span>
+                        </a>
+                        
+                        <a href="{% url 'wagtaildocs:index' %}" class="action-btn action-btn--secondary">
+                            <span class="icon icon-doc-full-inverse"></span>
+                            <span class="action-text">{% trans "Documents" %}</span>
+                        </a>
+                        
+                        <a href="{% url 'wagtailusers_users:index' %}" class="action-btn action-btn--secondary">
+                            <span class="icon icon-users"></span>
+                            <span class="action-text">{% trans "Manage Users" %}</span>
+                        </a>
+                        
+                        <a href="{% url 'analyticsmanagement:analytics_dashboard' %}" class="action-btn action-btn--secondary">
+                            <span class="icon icon-chart-simple"></span>
+                            <span class="action-text">{% trans "Analytics" %}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin/custom-admin.css' %}">
+{% endblock %}

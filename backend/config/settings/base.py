@@ -119,6 +119,9 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework.authtoken',
 
+    # Django extensions for development
+    'django_extensions',
+
     # Your apps
     'apps.authentication',
     'apps.contentmanagement',

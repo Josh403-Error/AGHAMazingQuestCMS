@@ -17,9 +17,6 @@ urlpatterns = [
     path('content/', views.ContentListView.as_view(), name='content-list'),
     path('content/<uuid:pk>/', views.ContentDetailView.as_view(), name='content-detail'),
     
-    # Analytics endpoints
-    path('analytics/', views.AnalyticsListView.as_view(), name='analytics-list'),
-    path('analytics/<uuid:pk>/', views.AnalyticsDetailView.as_view(), name='analytics-detail'),
     
     # Special endpoints
     path('system-stats/', views.system_stats, name='system-stats'),

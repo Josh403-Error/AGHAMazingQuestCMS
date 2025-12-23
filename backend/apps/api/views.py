@@ -8,12 +8,12 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.usermanagement.models import Role
 from apps.contentmanagement.models import Content
-from apps.analyticsmanagement.models import Analytics
+from apps.analyticsmanagement.models import PageView, ContentInteraction, UserActivity
 from apps.api.serializers import (
     UserSerializer, 
     RoleSerializer, 
     ContentSerializer, 
-    AnalyticsSerializer,
+    #AnalyticsSerializer,  # We'll need to update serializers as well
     DetailedContentSerializer,
     DetailedUserSerializer,
     RoleDetailedSerializer
@@ -76,21 +76,22 @@ class ContentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class AnalyticsListView(generics.ListCreateAPIView):
-    queryset = Analytics.objects.all()
-    serializer_class = AnalyticsSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['metric_type', 'user', 'content', 'created_at']
-    search_fields = ['metric_name', 'metric_value']
-    ordering_fields = ['created_at', 'metric_name']
-    ordering = ['-created_at']
+# Placeholder classes for analytics - need to create proper serializers
+# class AnalyticsListView(generics.ListCreateAPIView):
+#     queryset = Analytics.objects.all()
+#     serializer_class = AnalyticsSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+#     filterset_fields = ['metric_type', 'user', 'content', 'created_at']
+#     search_fields = ['metric_name', 'metric_value']
+#     ordering_fields = ['created_at', 'metric_name']
+#     ordering = ['-created_at']
 
 
-class AnalyticsDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Analytics.objects.all()
-    serializer_class = AnalyticsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+# class AnalyticsDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Analytics.objects.all()
+#     serializer_class = AnalyticsSerializer
+#     permission_classes = [permissions.IsAuthenticated]
 
 
 # API endpoint to get all system statistics
@@ -104,7 +105,7 @@ def system_stats(request):
         'total_users': User.objects.count(),
         'total_content': Content.objects.count(),
         'total_roles': Role.objects.count(),
-        'total_analytics': Analytics.objects.count(),
+        'total_page_views': PageView.objects.count(),
         'content_by_status': {
             'draft': Content.objects.filter(status='draft').count(),
             'review': Content.objects.filter(status='review').count(),
