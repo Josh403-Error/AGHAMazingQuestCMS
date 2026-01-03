@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from .models import User, Role
 
 
@@ -20,6 +21,21 @@ class RoleForm(forms.ModelForm):
             self.fields['role'].queryset = Role.objects.all().order_by('name')
 
 
+class CustomUserCreationForm(UserCreationForm):
+    """Custom user creation form that includes role field."""
+    
+    role = forms.ModelChoiceField(queryset=Role.objects.all().order_by('name'), required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('email', 'username', 'first_name', 'last_name', 'role')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make email required in the creation form
+        self.fields['email'].required = True
+
+
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'created_at')
@@ -29,7 +45,7 @@ class RoleAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     form = RoleForm
-    add_form = RoleForm
+    add_form = CustomUserCreationForm
     
     list_display = ('email', 'username', 'first_name', 'last_name', 'role', 'is_staff', 'is_active')
     search_fields = ('email', 'username', 'first_name', 'last_name')
