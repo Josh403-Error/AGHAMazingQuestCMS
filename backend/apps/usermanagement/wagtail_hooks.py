@@ -1,37 +1,43 @@
-try:
-    from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
-except Exception:
-    # Wagtail >=7 removed the contrib.modeladmin module; provide
-    # graceful fallbacks so migrations and startup don't fail.
-    def modeladmin_register(*args, **kwargs):
-        return None
-
-    class ModelAdmin:
-        def __init__(self, *a, **k):
-            pass
-
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-
-User = get_user_model()
-
-
-class DjangoUserAdmin(ModelAdmin):
-    model = User
-    menu_label = "Users"
-    menu_icon = "user"  # wagtail icon
-    list_display = ("username", "email", "is_active", "is_staff")
-    search_fields = ("username", "email")
-    # optionally: inspect edit_handler, list_filter, or form_overrides
+from django import forms
+from .models import Role
+from wagtail import hooks
+from wagtail.users.forms import UserCreationForm, UserEditForm
 
 
-class DjangoGroupAdmin(ModelAdmin):
-    model = Group
-    menu_label = "Roles"
-    menu_icon = "group"
-    list_display = ("name",)
-    search_fields = ("name",)
+class CustomUserCreationForm(UserCreationForm):
+    """Custom user creation form that includes the role and username fields."""
+    
+    username = forms.CharField(max_length=45, required=True)
+    role = forms.ModelChoiceField(queryset=Role.objects.all().order_by('name'), required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        fields = tuple(UserCreationForm.Meta.fields) + ('username', 'role')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
-modeladmin_register(DjangoUserAdmin)
-modeladmin_register(DjangoGroupAdmin)
+class CustomUserEditForm(UserEditForm):
+    """Custom user edit form that includes the role field."""
+    
+    role = forms.ModelChoiceField(queryset=Role.objects.all().order_by('name'), required=True)
+
+    class Meta(UserEditForm.Meta):
+        model = get_user_model()
+        fields = tuple(UserEditForm.Meta.fields) + ('role',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+# Register the custom forms with Wagtail
+@hooks.register('register_user_create_form')
+def register_user_create_form():
+    return CustomUserCreationForm
+
+
+@hooks.register('register_user_edit_form')
+def register_user_edit_form():
+    return CustomUserEditForm

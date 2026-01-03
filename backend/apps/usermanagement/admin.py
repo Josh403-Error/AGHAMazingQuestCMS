@@ -1,6 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django import forms
 from .models import User, Role
+
+
+class RoleForm(forms.ModelForm):
+    """Custom form to handle role assignment during user creation."""
+    
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure the role field is required and populated with available roles
+        if 'role' in self.fields:
+            self.fields['role'].required = True
+            # Order roles by name for better UX
+            self.fields['role'].queryset = Role.objects.all().order_by('name')
 
 
 @admin.register(Role)
@@ -11,6 +28,9 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
+    form = RoleForm
+    add_form = RoleForm
+    
     list_display = ('email', 'username', 'first_name', 'last_name', 'role', 'is_staff', 'is_active')
     search_fields = ('email', 'username', 'first_name', 'last_name')
     list_filter = ('is_staff', 'is_active', 'role', 'created_at')

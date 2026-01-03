@@ -30,6 +30,12 @@
   content: "AGHAMazing Quest CMS" !important;
 }
 
+/* Remove background from the welcome text */
+.dashboard-content h2.w-header {
+  background: none !important;
+  background-color: transparent !important;
+}
+
 /* Main navigation */
 .w-nav-main a,
 .w-nav-main a:link,

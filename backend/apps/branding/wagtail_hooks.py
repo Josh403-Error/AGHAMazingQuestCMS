@@ -19,14 +19,6 @@ def modify_main_menu(request, menu_items, all_permissions=None):
             filtered_menu_items.append(item)
     
     # Add custom menu items in organized sections
-    content_menu = MenuItem(
-        'Content Management',
-        reverse('wagtailadmin_explore_root'),
-        name='content',
-        icon_name='folder-open-inverse',
-        order=100
-    )
-    
     dashboard_menu = MenuItem(
         'Dashboard',
         reverse('wagtailadmin_home'),
@@ -36,7 +28,6 @@ def modify_main_menu(request, menu_items, all_permissions=None):
     )
     
     filtered_menu_items.insert(0, dashboard_menu)  # Add dashboard as first item
-    filtered_menu_items.append(content_menu)
     
     # The analytics dashboard is properly registered in the analyticsmanagement app
     
