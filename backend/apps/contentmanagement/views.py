@@ -177,6 +177,22 @@ def custom_dashboard(request):
     # Recent activities
     recent_activities = UserActivity.objects.select_related('user').order_by('-timestamp')[:10]
     
+    # Additional stats for enhanced dashboard
+    recently_created_content = Content.objects.filter(
+        created_at__gte=thirty_days_ago
+    ).order_by('-created_at')[:5]
+    
+    content_by_category = Content.objects.filter(
+        deleted_at__isnull=True
+    ).values('category__name').annotate(count=Count('id')).order_by('-count')
+    
+    # Content by author (for the last 30 days)
+    recent_content_by_author = Content.objects.filter(
+        created_at__gte=thirty_days_ago
+    ).values('author__username', 'author__first_name', 'author__last_name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+    
     context = {
         'total_content_count': total_content_count,
         'total_users_count': total_users_count,
@@ -184,6 +200,9 @@ def custom_dashboard(request):
         'page_views_count': page_views_count,
         'content_status_list': content_status_list,
         'recent_activities': recent_activities,
+        'recently_created_content': recently_created_content,
+        'content_by_category': content_by_category,
+        'recent_content_by_author': recent_content_by_author,
     }
     
     return render(request, 'wagtail/admin/dashboard.html', context)

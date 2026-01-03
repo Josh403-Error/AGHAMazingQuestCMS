@@ -25,8 +25,12 @@ urlpatterns = [
     # Custom dashboard at /dashboard/
     path('dashboard/', custom_dashboard, name='custom_dashboard'),
     
-    # Standard Wagtail admin at /cms/
-    path('cms/', include(wagtailadmin_urls)),
+    # Wagtail admin - mapping custom dashboard to home while preserving other admin URLs
+    path('cms/', include([
+        path('', custom_dashboard, name='wagtailadmin_home'),
+        path('dashboard/', custom_dashboard, name='wagtailadmin_dashboard'),
+        path('', include(wagtailadmin_urls)),
+    ])),
     
     # Document management
     path('documents/', include(wagtaildocs_urls)),

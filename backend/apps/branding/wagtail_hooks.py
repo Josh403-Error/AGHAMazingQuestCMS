@@ -7,8 +7,6 @@ from django.urls import path
 from apps.contentmanagement.views import custom_dashboard
 
 
-
-
 def modify_main_menu(request, menu_items, all_permissions=None):
     """
     Customizes the main admin menu with organized structure
@@ -29,6 +27,15 @@ def modify_main_menu(request, menu_items, all_permissions=None):
         order=100
     )
     
+    dashboard_menu = MenuItem(
+        'Dashboard',
+        reverse('wagtailadmin_home'),
+        name='dashboard',
+        icon_name='dashboard',
+        order=50
+    )
+    
+    filtered_menu_items.insert(0, dashboard_menu)  # Add dashboard as first item
     filtered_menu_items.append(content_menu)
     
     # The analytics dashboard is properly registered in the analyticsmanagement app

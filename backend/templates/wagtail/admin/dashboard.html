@@ -2,7 +2,6 @@
 {% load i18n %}
 {% load wagtailadmin_tags %}
 {% load static %}
-{% load dashboard_extras %}
 
 {% block titletag %}{% trans "Dashboard" %}{% endblock %}
 {% block bodyclass %}dashboard{% endblock %}
@@ -20,7 +19,7 @@
         </div>
     </header>
 
-    <div class="dashboard-content">
+    <div class="dashboard-content nice-padding">
         <div class="row">
             <div class="col12">
                 <h2 class="w-header">{% trans "Welcome to AGHAMazing Quest CMS" %}</h2>
@@ -28,56 +27,94 @@
             </div>
         </div>
 
-        <div class="stats-grid">
-            <!-- Quick Stats -->
-            <div class="stat-card">
-                <div class="stat-card__icon bg-blue">
-                    <span class="icon icon-doc-full-inverse"></span>
-                </div>
-                <div class="stat-card__content">
-                    <h3 class="stat-card__title">{% trans "Total Content" %}</h3>
-                    <div class="stat-card__value">{{ total_content_count|default:0 }}</div>
-                    <div class="stat-card__label">{% trans "Published items" %}</div>
+        <!-- Quick Stats -->
+        <div class="row">
+            <div class="col3">
+                <div class="panel summary-card bg-primary-light">
+                    <div class="panel-content text-center">
+                        <div class="metric">{{ total_content_count|default:0 }}</div>
+                        <p class="metric-desc">{% trans "Total Content" %}</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-card__icon bg-green">
-                    <span class="icon icon-user"></span>
-                </div>
-                <div class="stat-card__content">
-                    <h3 class="stat-card__title">{% trans "Total Users" %}</h3>
-                    <div class="stat-card__value">{{ total_users_count|default:0 }}</div>
-                    <div class="stat-card__label">{% trans "Active accounts" %}</div>
+            <div class="col3">
+                <div class="panel summary-card bg-secondary-light">
+                    <div class="panel-content text-center">
+                        <div class="metric">{{ total_users_count|default:0 }}</div>
+                        <p class="metric-desc">{% trans "Total Users" %}</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-card__icon bg-orange">
-                    <span class="icon icon-tick"></span>
-                </div>
-                <div class="stat-card__content">
-                    <h3 class="stat-card__title">{% trans "Pending Reviews" %}</h3>
-                    <div class="stat-card__value">{{ pending_reviews_count|default:0 }}</div>
-                    <div class="stat-card__label">{% trans "Awaiting approval" %}</div>
+            <div class="col3">
+                <div class="panel summary-card bg-warning-light">
+                    <div class="panel-content text-center">
+                        <div class="metric">{{ pending_reviews_count|default:0 }}</div>
+                        <p class="metric-desc">{% trans "Pending Reviews" %}</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-card__icon bg-purple">
-                    <span class="icon icon-view"></span>
-                </div>
-                <div class="stat-card__content">
-                    <h3 class="stat-card__title">{% trans "Page Views" %}</h3>
-                    <div class="stat-card__value">{{ page_views_count|default:0 }}</div>
-                    <div class="stat-card__label">{% trans "This month" %}</div>
+            <div class="col3">
+                <div class="panel summary-card bg-info-light">
+                    <div class="panel-content text-center">
+                        <div class="metric">{{ page_views_count|default:0 }}</div>
+                        <p class="metric-desc">{% trans "Page Views (30d)" %}</p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Main Content Grid -->
         <div class="row">
-            <!-- Recent Activity -->
+            <!-- Left Column - Content Management -->
             <div class="col6">
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-doc-full-inverse">{% trans "Content Management" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        <!-- Content Status Breakdown -->
+                        {% if content_status_list %}
+                            <div class="status-breakdown">
+                                <h3>{% trans "Content Status Overview" %}</h3>
+                                {% for item in content_status_list %}
+                                    <div class="status-item">
+                                        <div class="status-header">
+                                            <span class="status-label {{ item.status }}">{{ item.status|title }}</span>
+                                            <span class="status-count">({{ item.count }} items)</span>
+                                        </div>
+                                        <div class="status-bar">
+                                            <div class="status-bar-fill" style="width: {{ item.percentage }}%"></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="help-block">{% trans "No content available." %}</p>
+                        {% endif %}
+                        
+                        <!-- Content by Category -->
+                        <div class="content-by-category">
+                            <h3>{% trans "Content by Category" %}</h3>
+                            {% if content_by_category %}
+                                <ul class="item-list">
+                                    {% for item in content_by_category %}
+                                        <li>
+                                            <span class="category-name">{{ item.category__name|default:"Uncategorized" }}</span>
+                                            <span class="category-count">{{ item.count }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="help-block">{% trans "No categories available." %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
                 <div class="panel">
                     <div class="panel__header">
                         <h2 class="panel__title icon icon-user">{% trans "Recent Activity" %}</h2>
@@ -103,71 +140,137 @@
                 </div>
             </div>
 
-            <!-- Content Status -->
+            <!-- Right Column - Quick Actions and Analytics -->
             <div class="col6">
+                <!-- Quick Actions -->
                 <div class="panel">
                     <div class="panel__header">
-                        <h2 class="panel__title icon icon-doc-full-inverse">{% trans "Content Status" %}</h2>
+                        <h2 class="panel__title icon icon-cogs">{% trans "Quick Actions" %}</h2>
                     </div>
                     <div class="panel__content">
-                        {% if content_status_list %}
-                            <div class="status-breakdown">
-                                {% for item in content_status_list %}
-                                    <div class="status-item">
-                                        <div class="status-header">
-                                            <span class="status-label {{ item.status }}">{{ item.status|title }}</span>
-                                            <span class="status-count">({{ item.count }} items)</span>
-                                        </div>
-                                        <div class="status-bar">
-                                            <div class="status-bar-fill" style="width: {{ item.percentage }}%"></div>
-                                        </div>
-                                    </div>
+                        <div class="actions-grid">
+                            <a href="{% url 'wagtailadmin_pages:add_subpage' parent_page.id|default:2 %}" class="action-btn action-btn--primary">
+                                <span class="icon icon-plus"></span>
+                                <span class="action-text">{% trans "Create Content" %}</span>
+                            </a>
+                            
+                            <a href="{% url 'wagtailadmin_explore_root' %}" class="action-btn action-btn--secondary">
+                                <span class="icon icon-folder-open-inverse"></span>
+                                <span class="action-text">{% trans "Browse Content" %}</span>
+                            </a>
+                            
+                            <a href="{% url 'wagtailimages:index' %}" class="action-btn action-btn--secondary">
+                                <span class="icon icon-image"></span>
+                                <span class="action-text">{% trans "Manage Media" %}</span>
+                            </a>
+                            
+                            <a href="{% url 'wagtaildocs:index' %}" class="action-btn action-btn--secondary">
+                                <span class="icon icon-doc-full-inverse"></span>
+                                <span class="action-text">{% trans "Documents" %}</span>
+                            </a>
+                            
+                            <a href="{% url 'wagtailusers_users:index' %}" class="action-btn action-btn--secondary">
+                                <span class="icon icon-users"></span>
+                                <span class="action-text">{% trans "Manage Users" %}</span>
+                            </a>
+                            
+                            <a href="{% url 'analyticsmanagement:analytics_dashboard' %}" class="action-btn action-btn--secondary">
+                                <span class="icon icon-chart-simple"></span>
+                                <span class="action-text">{% trans "Analytics" %}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content by Author -->
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-user">{% trans "Top Contributors (30d)" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        {% if recent_content_by_author %}
+                            <ul class="contributors-list">
+                                {% for item in recent_content_by_author %}
+                                    <li>
+                                        <span class="contributor-name">
+                                            {{ item.author__first_name|default:item.author__username }} {{ item.author__last_name }}
+                                        </span>
+                                        <span class="contributor-count">{{ item.count }} items</span>
+                                    </li>
                                 {% endfor %}
-                            </div>
+                            </ul>
                         {% else %}
-                            <p class="help-block">{% trans "No content available." %}</p>
+                            <p class="help-block">{% trans "No contributor data available." %}</p>
                         {% endif %}
+                    </div>
+                </div>
+
+                <!-- Navigation Shortcuts -->
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-link">{% trans "Navigation Shortcuts" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        <div class="nav-shortcuts">
+                            <div class="nav-group">
+                                <h4>{% trans "Content" %}</h4>
+                                <ul>
+                                    <li><a href="{% url 'wagtailadmin_explore_root' %}">{% trans "All Content" %}</a></li>
+                                    <li><a href="{% url 'wagtailimages:index' %}">{% trans "Media Library" %}</a></li>
+                                    <li><a href="{% url 'wagtaildocs:index' %}">{% trans "Documents" %}</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="nav-group">
+                                <h4>{% trans "Users & Roles" %}</h4>
+                                <ul>
+                                    <li><a href="{% url 'wagtailusers_users:index' %}">{% trans "Manage Users" %}</a></li>
+                                    <li><a href="{% url 'wagtailusers_groups:index' %}">{% trans "Manage Roles" %}</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="nav-group">
+                                <h4>{% trans "Settings" %}</h4>
+                                <ul>
+                                    <li><a href="{% url 'wagtailadmin_account' %}">{% trans "My Account" %}</a></li>
+                                    <li><a href="{% url 'wagtailusers_groups:index' %}">{% trans "Roles" %}</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="quick-actions-section">
-            <div class="panel">
-                <div class="panel__header">
-                    <h2 class="panel__title icon icon-cogs">{% trans "Quick Actions" %}</h2>
-                </div>
-                <div class="panel__content">
-                    <div class="actions-grid">
-                        <a href="{% url 'wagtailadmin_pages:add_subpage' parent_page.id|default:2 %}" class="action-btn action-btn--primary">
-                            <span class="icon icon-plus"></span>
-                            <span class="action-text">{% trans "Create Content" %}</span>
-                        </a>
-                        
-                        <a href="{% url 'wagtailadmin_explore_root' %}" class="action-btn action-btn--secondary">
-                            <span class="icon icon-folder-open-inverse"></span>
-                            <span class="action-text">{% trans "Browse Content" %}</span>
-                        </a>
-                        
-                        <a href="{% url 'wagtailimages:index' %}" class="action-btn action-btn--secondary">
-                            <span class="icon icon-image"></span>
-                            <span class="action-text">{% trans "Manage Media" %}</span>
-                        </a>
-                        
-                        <a href="{% url 'wagtaildocs:index' %}" class="action-btn action-btn--secondary">
-                            <span class="icon icon-doc-full-inverse"></span>
-                            <span class="action-text">{% trans "Documents" %}</span>
-                        </a>
-                        
-                        <a href="{% url 'wagtailusers_users:index' %}" class="action-btn action-btn--secondary">
-                            <span class="icon icon-users"></span>
-                            <span class="action-text">{% trans "Manage Users" %}</span>
-                        </a>
-                        
-                        <a href="{% url 'analyticsmanagement:analytics_dashboard' %}" class="action-btn action-btn--secondary">
-                            <span class="icon icon-chart-simple"></span>
-                            <span class="action-text">{% trans "Analytics" %}</span>
-                        </a>
+        <!-- Additional Information Section -->
+        <div class="row">
+            <div class="col12">
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title icon icon-help">{% trans "Helpful Resources" %}</h2>
+                    </div>
+                    <div class="panel__content">
+                        <div class="help-resources">
+                            <div class="help-grid">
+                                <div class="help-item">
+                                    <h3 class="icon icon-doc-full">{% trans "Documentation" %}</h3>
+                                    <p>{% trans "Learn how to create and manage content effectively." %}</p>
+                                    <a href="#" class="button button-small">{% trans "View Docs" %}</a>
+                                </div>
+                                
+                                <div class="help-item">
+                                    <h3 class="icon icon-faqs">{% trans "FAQs" %}</h3>
+                                    <p>{% trans "Find answers to common questions." %}</p>
+                                    <a href="#" class="button button-small">{% trans "View FAQs" %}</a>
+                                </div>
+                                
+                                <div class="help-item">
+                                    <h3 class="icon icon-wagtail">{% trans "Support" %}</h3>
+                                    <p>{% trans "Get help from our support team." %}</p>
+                                    <a href="#" class="button button-small">{% trans "Contact Support" %}</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -177,4 +280,189 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/admin/custom-admin.css' %}">
+    <style>
+        .summary-card {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .summary-card .metric {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .summary-card .metric-desc {
+            font-size: 0.9em;
+            margin: 0;
+            color: #666;
+        }
+        
+        .status-breakdown h3,
+        .content-by-category h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .item-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .item-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .category-name {
+            font-weight: 500;
+        }
+        
+        .category-count {
+            background: #004A98;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+        
+        .contributors-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .contributors-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .contributor-name {
+            font-weight: 500;
+        }
+        
+        .contributor-count {
+            color: #004A98;
+            font-weight: bold;
+        }
+        
+        .activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-user {
+            font-weight: bold;
+        }
+        
+        .activity-time {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+            min-height: 80px;
+        }
+        
+        .action-btn:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #004A98;
+        }
+        
+        .action-btn--primary {
+            background-color: #004A98;
+            color: white;
+            border-color: #004A98;
+        }
+        
+        .action-btn--primary:hover {
+            background-color: #003a7a;
+            border-color: #003a7a;
+        }
+        
+        .action-btn .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .action-btn--primary .icon {
+            color: white;
+        }
+        
+        .action-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-shortcuts {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .nav-group {
+            flex: 1;
+            min-width: 150px;
+            margin-right: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .nav-group ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-group ul li {
+            padding: 3px 0;
+        }
+        
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .help-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+        
+        .help-item h3 {
+            margin-top: 0;
+        }
+        
+        .bg-primary-light { background-color: #e3f2fd !important; }
+        .bg-secondary-light { background-color: #f3e5f5 !important; }
+        .bg-warning-light { background-color: #fff8e1 !important; }
+        .bg-info-light { background-color: #e1f5fe !important; }
+    </style>
 {% endblock %}
