@@ -2,6 +2,63 @@
 
 A Content Management System for managing game content with workflow capabilities.
 
+## Project Structure
+
+```
+AGHAMazingQuestCMS/
+├── backend/
+│   ├── apps/
+│   │   ├── authentication/
+│   │   ├── contentmanagement/
+│   │   ├── usermanagement/
+│   │   ├── analyticsmanagement/
+│   │   └── branding/
+│   ├── config/
+│   │   ├── settings/
+│   │   ├── asgi.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── static/
+│   ├── templates/
+│   └── tests/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── styles/
+│   │   ├── utils/
+│   │   └── assets/
+│   ├── package.json
+│   ├── package-lock.json
+│   └── build/
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   ├── deployment/
+│   ├── development/
+│   └── user-guides/
+├── deployment/
+│   ├── docker/
+│   ├── docker-compose.yml
+│   └── nginx.conf
+├── scripts/
+│   ├── setup/
+│   ├── deployment/
+│   ├── testing/
+│   └── utilities/
+├── tests/
+│   ├── integration/
+│   ├── unit/
+│   └── smoke/
+├── .env.example
+├── .env
+├── README.md
+└── CHANGELOG.md
+```
+
 ## Features
 
 - Content creation, editing, approval, and publishing workflows
@@ -100,114 +157,41 @@ To create a superuser:
 docker exec -it deployment-web-1 python manage.py shell -c "from apps.usermanagement.models import User, Role; from django.contrib.auth.hashers import make_password; admin_role, _ = Role.objects.get_or_create(name='Admin', defaults={'description': 'Administrator'}); User.objects.create(email='your-email@example.com', username='yourusername', first_name='First', last_name='Last', role=admin_role, password=make_password('yourpassword'), is_staff=True, is_superuser=True)"
 ```
 
-### Available Roles
-
-The system comes with predefined roles:
-- **Encoder**: Can create content
-- **Editor**: Can create and edit content
-- **Approver**: Can approve content for publication
-- **Admin**: Can publish content
-- **Super Admin**: Full system access
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-1. **Django Admin Styling Not Loading**
-   - Ensure nginx is properly configured to serve static files from [/app/staticfiles/](file:///app/staticfiles/)
-   - Restart nginx container after configuration changes:
-     ```bash
-     docker restart deployment-nginx-1
-     ```
-
-2. **Permission Denied When Accessing Django Admin**
-   - Verify user has `is_staff=True` and `is_superuser=True` flags
-   - Update user permissions:
-     ```bash
-     docker exec -it deployment-web-1 python manage.py shell -c "from apps.usermanagement.models import User; u = User.objects.get(email='admin@example.com'); u.is_staff = True; u.is_superuser = True; u.save()"
-     ```
-
-3. **Database Connection Issues**
-   - Check that the database container is running:
-     ```bash
-     docker ps | grep deployment-db
-     ```
-   - Verify database credentials in [.env](file:///C:/Users/apcadmin/Documents/GitHub/AGHAMazingQuestCMS/.env) file
-
-4. **Frontend Not Loading**
-   - Ensure frontend has been built and `frontend/build` directory exists
-   - Check nginx configuration for proper static file serving
-
-For detailed Django Admin troubleshooting, see our [Django Admin Setup Guide](docs/django_admin_setup.md).
-
-### Checking Service Status
-
-To check if all services are running:
-```bash
-docker ps
-```
-
-To check logs for a specific service:
-```bash
-docker logs <container-name>
-```
-
-For example, to check web service logs:
-```bash
-docker logs deployment-web-1
-```
-
 ## Development
 
-### Local Frontend Development
+### Backend Development
+To run the backend locally:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py runserver
+```
 
-To develop the frontend locally:
+### Frontend Development
+To run the frontend locally:
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-This will start the React development server on http://localhost:3000
+## Scripts
 
-### Local Backend Development
+The project includes various scripts organized in the [scripts](file:///C:/Users/apcadmin/Documents/GitHub/AGHAMazingQuestCMS/scripts) directory:
 
-For backend development:
-1. Set up a Python virtual environment:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-2. Configure environment variables as needed
-
-3. Run the development server:
-   ```bash
-   python manage.py runserver
-   ```
+- **setup/**: Scripts for initializing the CMS and creating test users
+- **deployment/**: Scripts for deployment-related tasks
+- **testing/**: Scripts for testing and validation
+- **utilities/**: Utility scripts for development and maintenance
 
 ## Documentation
 
-- [Running Instructions](RUNNING_INSTRUCTIONS.md)
-- [PostgreSQL and pgAdmin Setup](docs/postgresql_pgadmin_setup.md)
-- [Django Admin Setup Guide](docs/django_admin_setup.md)
+Comprehensive documentation is available in the [docs](file:///C:/Users/apcadmin/Documents/GitHub/AGHAMazingQuestCMS/docs) directory:
 
-## Project Structure
-
-- `backend/`: Django backend application
-  - `apps/`: Individual Django applications
-    - `authentication/`: User authentication
-    - `contentmanagement/`: Content management features
-    - `usermanagement/`: User and role management
-    - `analyticsmanagement/`: Analytics and reporting
-  - `config/`: Django settings and configuration
-- `frontend/`: React frontend application
-- `deployment/`: Docker and Docker Compose configurations
-- `docs/`: Project documentation
-- `scripts/`: Utility scripts for development
-
-## License
-
-[MIT License](LICENSE)
+- **architecture/**: Architecture decisions and system design
+- **api/**: API documentation and specifications
+- **deployment/**: Deployment guides and procedures
+- **development/**: Development guidelines and best practices
+- **user-guides/**: User guides and tutorials
