@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from apps.usermanagement.models import Role
-from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory
+from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory, MediaLibrary
 from apps.analyticsmanagement.models import PageView, ContentInteraction, UserActivity
 from .models import APIIntegration, APIIntegrationLog
 from .serializers import (
@@ -24,7 +24,9 @@ from .serializers import (
     ChallengeProgressSerializer,
     ContentCategorySerializer,
     APIIntegrationSerializer,
-    APIIntegrationLogSerializer
+    APIIntegrationLogSerializer,
+    MobileMediaContentSerializer,
+    CreateMobileMediaContentSerializer
 )
 
 User = get_user_model()
@@ -208,6 +210,50 @@ class APIIntegrationLogListView(generics.ListAPIView):
     search_fields = ['endpoint', 'ip_address']
     ordering_fields = ['request_time', 'response_status', 'response_time']
     ordering = ['-request_time']
+
+
+# Mobile Media Content specific views
+class MobileMediaContentViewSet(generics.ListCreateAPIView):
+    """
+    API view for mobile media content - GET and POST for media files
+    """
+    queryset = MediaLibrary.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateMobileMediaContentSerializer
+        return MobileMediaContentSerializer
+    
+    def get_queryset(self):
+        # Allow filtering by media type for mobile app
+        queryset = MediaLibrary.objects.all()
+        media_type = self.request.query_params.get('media_type', None)
+        
+        if media_type:
+            # Filter by MIME type based on media_type parameter
+            if media_type == 'image':
+                queryset = queryset.filter(mime_type__startswith='image/')
+            elif media_type == 'video':
+                queryset = queryset.filter(mime_type__startswith='video/')
+            elif media_type == 'audio':
+                queryset = queryset.filter(mime_type__startswith='audio/')
+        
+        # Order by creation date, newest first
+        return queryset.order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        # Set the uploader to the current user
+        serializer.save(uploader=self.request.user)
+
+
+class MobileMediaContentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a specific mobile media content
+    """
+    queryset = MediaLibrary.objects.all()
+    serializer_class = MobileMediaContentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 # API endpoint to get all system statistics

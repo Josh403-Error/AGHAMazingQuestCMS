@@ -4,7 +4,7 @@ API serializers for the unified headless CMS
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from apps.usermanagement.models import Role
-from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory
+from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory, MediaLibrary
 from .models import APIIntegration, APIIntegrationLog
 # from apps.analyticsmanagement.models import Analytics  # Removed since model doesn't exist
 
@@ -142,3 +142,51 @@ class APIIntegrationLogSerializer(serializers.ModelSerializer):
         model = APIIntegrationLog
         fields = '__all__'
         read_only_fields = ('id', 'request_time')
+
+
+# Mobile Media Content specific serializers
+class MobileMediaContentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for mobile media content - focuses on media files instead of web pages
+    """
+    media_url = serializers.SerializerMethodField()
+    uploader_email = serializers.EmailField(source='uploader.email', read_only=True)
+    uploader_full_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = MediaLibrary
+        fields = [
+            'id', 'file_name', 'file_path', 'file_size', 'mime_type',
+            'description', 'tags', 'created_at', 'updated_at',
+            'uploader', 'uploader_email', 'uploader_full_name', 'media_url'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'uploader']
+    
+    def get_media_url(self, obj):
+        # Return the actual file URL instead of just the path
+        request = self.context.get('request')
+        if obj.file_path and request:
+            return request.build_absolute_uri(obj.file_path)
+        return obj.file_path
+    
+    def get_uploader_full_name(self, obj):
+        return f"{obj.uploader.first_name} {obj.uploader.last_name}"
+
+
+class CreateMobileMediaContentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating mobile media content
+    """
+    class Meta:
+        model = MediaLibrary
+        fields = [
+            'file_name', 'file_path', 'file_size', 'mime_type',
+            'description', 'tags'
+        ]
+    
+    def create(self, validated_data):
+        # The uploader will be set from the view
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['uploader'] = request.user
+        return MediaLibrary.objects.create(**validated_data)

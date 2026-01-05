@@ -36,37 +36,33 @@ def modify_main_menu(request, menu_items, all_permissions=None):
 hooks.register('construct_main_menu', modify_main_menu)
 
 
-# For Wagtail model admin, we need to check if it's available and handle accordingly
-try:
-    from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
-    from .models import MediaLibrary, ContentCategory
+# Register the new models to be accessible in Wagtail admin
+from wagtail.modeladmin.options import ModelAdmin, modeladmin_register
+from .models import MediaLibrary, ContentCategory
 
 
-    class MediaLibraryAdmin(ModelAdmin):
-        model = MediaLibrary
-        menu_label = 'Media Library'
-        menu_icon = 'image'  # change as needed
-        add_to_settings_menu = False  # or True to add to Settings sub-menu
-        exclude_from_explorer = False  # or True to exclude from navigation
-        list_display = ('file_name', 'file_size', 'mime_type', 'uploader', 'created_at')
-        list_filter = ('mime_type', 'created_at')
-        search_fields = ('file_name', 'description')
+class MediaLibraryAdmin(ModelAdmin):
+    model = MediaLibrary
+    menu_label = 'Media Library'
+    menu_icon = 'image'  # change as needed
+    add_to_settings_menu = False  # or True to add to Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude from navigation
+    list_display = ('file_name', 'file_size', 'mime_type', 'uploader', 'created_at')
+    list_filter = ('mime_type', 'created_at')
+    search_fields = ('file_name', 'description')
 
 
-    class ContentCategoryAdmin(ModelAdmin):
-        model = ContentCategory
-        menu_label = 'Content Categories'
-        menu_icon = 'folder-inverse'
-        add_to_settings_menu = False
-        exclude_from_explorer = False
-        list_display = ('name', 'parent')
-        list_filter = ('parent',)
-        search_fields = ('name',)
+class ContentCategoryAdmin(ModelAdmin):
+    model = ContentCategory
+    menu_label = 'Content Categories'
+    menu_icon = 'folder-inverse'
+    add_to_settings_menu = False
+    exclude_from_explorer = False
+    list_display = ('name', 'parent')
+    list_filter = ('parent',)
+    search_fields = ('name',)
 
 
-    # Now we register our custom model admins
-    modeladmin_register(MediaLibraryAdmin)
-    modeladmin_register(ContentCategoryAdmin)
-except ImportError:
-    # wagtail.contrib.modeladmin might not be available in all versions
-    pass
+# Now we register our custom model admins
+modeladmin_register(MediaLibraryAdmin)
+modeladmin_register(ContentCategoryAdmin)
