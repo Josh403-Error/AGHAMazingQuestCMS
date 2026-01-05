@@ -70,7 +70,7 @@ class AnalyticsDashboardPageAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'first_published_at')
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'live', 'has_unpublished_changes')
+            'fields': ('title', 'slug')  # Removed 'live' and 'has_unpublished_changes' as they're managed by Wagtail
         }),
         ('Content', {
             'fields': ('intro', 'content')

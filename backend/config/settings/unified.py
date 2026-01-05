@@ -73,14 +73,17 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
+    # API Key authentication and rate limiting middleware
+    'apps.api.middleware.APIKeyAuthMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -161,7 +164,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
-AUTH_USER_MODEL = 'apps.usermanagement.User'
+AUTH_USER_MODEL = 'usermanagement.User'
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = 'AGHAMazing Quest CMS'

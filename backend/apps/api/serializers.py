@@ -4,7 +4,8 @@ API serializers for the unified headless CMS
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from apps.usermanagement.models import Role
-from apps.contentmanagement.models import Content
+from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory
+from .models import APIIntegration, APIIntegrationLog
 # from apps.analyticsmanagement.models import Analytics  # Removed since model doesn't exist
 
 User = get_user_model()
@@ -87,3 +88,57 @@ class RoleDetailedSerializer(serializers.ModelSerializer):
     
     def get_user_count(self, obj):
         return obj.users.filter(deleted_at__isnull=True).count()
+
+
+# Mobile AR Tour specific serializers
+class ContentCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentCategory
+        fields = '__all__'
+
+
+class MarkerSerializer(serializers.ModelSerializer):
+    content_title = serializers.CharField(source='content.title', read_only=True)
+    content_body = serializers.CharField(source='content.body', read_only=True)
+    
+    class Meta:
+        model = Marker
+        fields = [
+            'id', 'code', 'latitude', 'longitude', 'content_url',
+            'content_title', 'content_body', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = '__all__'
+
+
+class ChallengeProgressSerializer(serializers.ModelSerializer):
+    challenge = ChallengeSerializer(read_only=True)
+    
+    class Meta:
+        model = ChallengeProgress
+        fields = '__all__'
+        read_only_fields = ['user', 'created_at', 'updated_at']
+
+
+# API Integration serializers
+class APIIntegrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIIntegration
+        fields = '__all__'
+        read_only_fields = ('id', 'api_key', 'created_at', 'updated_at')
+
+    def create(self, validated_data):
+        # The model will generate the API key automatically
+        return APIIntegration.objects.create(**validated_data)
+
+
+class APIIntegrationLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIIntegrationLog
+        fields = '__all__'
+        read_only_fields = ('id', 'request_time')

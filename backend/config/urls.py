@@ -19,6 +19,9 @@ urlpatterns = [
     # Admin URLs
     path('django-admin/', admin.site.urls),
     
+    # Authentication endpoints
+    path('auth/', include('apps.authentication.urls')),
+    
     # Custom API endpoints
     path('api/', include('apps.api.urls')),
     

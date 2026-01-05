@@ -6,17 +6,25 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 from apps.usermanagement.models import Role
-from apps.contentmanagement.models import Content
+from apps.contentmanagement.models import Content, Marker, Challenge, ChallengeProgress, ContentCategory
 from apps.analyticsmanagement.models import PageView, ContentInteraction, UserActivity
-from apps.api.serializers import (
+from .models import APIIntegration, APIIntegrationLog
+from .serializers import (
     UserSerializer, 
     RoleSerializer, 
     ContentSerializer, 
     #AnalyticsSerializer,  # We'll need to update serializers as well
     DetailedContentSerializer,
     DetailedUserSerializer,
-    RoleDetailedSerializer
+    RoleDetailedSerializer,
+    MarkerSerializer,
+    ChallengeSerializer,
+    ChallengeProgressSerializer,
+    ContentCategorySerializer,
+    APIIntegrationSerializer,
+    APIIntegrationLogSerializer
 )
 
 User = get_user_model()
@@ -76,22 +84,130 @@ class ContentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# Placeholder classes for analytics - need to create proper serializers
-# class AnalyticsListView(generics.ListCreateAPIView):
-#     queryset = Analytics.objects.all()
-#     serializer_class = AnalyticsSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-#     filterset_fields = ['metric_type', 'user', 'content', 'created_at']
-#     search_fields = ['metric_name', 'metric_value']
-#     ordering_fields = ['created_at', 'metric_name']
-#     ordering = ['-created_at']
+# Mobile AR Tour specific API views
+class MarkerListView(generics.ListAPIView):
+    """
+    List all AR markers for mobile app
+    """
+    queryset = Marker.objects.all()
+    serializer_class = MarkerSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Allow read-only for mobile app
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['content_type']
+    search_fields = ['code', 'title']
+    ordering_fields = ['created_at', 'title']
+    ordering = ['-created_at']
 
 
-# class AnalyticsDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Analytics.objects.all()
-#     serializer_class = AnalyticsSerializer
-#     permission_classes = [permissions.IsAuthenticated]
+class MarkerDetailView(generics.RetrieveAPIView):
+    """
+    Get details of a specific AR marker
+    """
+    queryset = Marker.objects.all()
+    serializer_class = MarkerSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class ChallengeListView(generics.ListAPIView):
+    """
+    List all challenges for mobile app
+    """
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['type', 'points']
+    search_fields = ['title', 'description']
+    ordering_fields = ['created_at', 'points', 'title']
+    ordering = ['-created_at']
+
+
+class ChallengeDetailView(generics.RetrieveAPIView):
+    """
+    Get details of a specific challenge
+    """
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class UserChallengeProgressListView(generics.ListCreateAPIView):
+    """
+    List or create challenge progress for the current user
+    """
+    serializer_class = ChallengeProgressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ChallengeProgress.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Ensure the progress is saved for the current user
+        serializer.save(user=self.request.user)
+
+
+class UserChallengeProgressDetailView(generics.RetrieveUpdateAPIView):
+    """
+    Get or update specific challenge progress for the current user
+    """
+    serializer_class = ChallengeProgressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ChallengeProgress.objects.filter(user=user)
+
+
+class ContentCategoryListView(generics.ListAPIView):
+    """
+    List all content categories
+    """
+    queryset = ContentCategory.objects.all()
+    serializer_class = ContentCategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'created_at']
+    ordering = ['name']
+
+
+# API Integration management views
+class APIIntegrationListView(generics.ListCreateAPIView):
+    """
+    List or create API integrations
+    """
+    queryset = APIIntegration.objects.all()
+    serializer_class = APIIntegrationSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admins can manage integrations
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['is_active']
+    search_fields = ['name', 'description']
+    ordering_fields = ['created_at', 'name', 'is_active']
+    ordering = ['-created_at']
+
+
+class APIIntegrationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Get, update or delete a specific API integration
+    """
+    queryset = APIIntegration.objects.all()
+    serializer_class = APIIntegrationSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admins can manage integrations
+
+
+class APIIntegrationLogListView(generics.ListAPIView):
+    """
+    List API integration logs
+    """
+    queryset = APIIntegrationLog.objects.all()
+    serializer_class = APIIntegrationLogSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admins can view logs
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['integration', 'response_status', 'method']
+    search_fields = ['endpoint', 'ip_address']
+    ordering_fields = ['request_time', 'response_status', 'response_time']
+    ordering = ['-request_time']
 
 
 # API endpoint to get all system statistics
@@ -132,4 +248,53 @@ def user_content(request):
     """
     content = Content.objects.filter(author=request.user)
     serializer = ContentSerializer(content, many=True)
+    return Response(serializer.data)
+
+
+# Mobile AR Tour specific endpoints
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticatedOrReadOnly])  # Allow read-only for mobile app
+def nearby_markers(request):
+    """
+    Get markers near the current user's location
+    Expects latitude and longitude as query parameters
+    """
+    latitude = request.query_params.get('latitude', None)
+    longitude = request.query_params.get('longitude', None)
+    
+    if latitude is None or longitude is None:
+        # If no location provided, return all markers
+        markers = Marker.objects.all()
+    else:
+        # In a real implementation, we would filter by proximity
+        # This is a simplified version for the headless CMS
+        markers = Marker.objects.all()
+    
+    serializer = MarkerSerializer(markers, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def complete_challenge(request, challenge_id):
+    """
+    Mark a challenge as completed by the current user
+    """
+    try:
+        challenge = Challenge.objects.get(pk=challenge_id)
+    except Challenge.DoesNotExist:
+        return Response({'error': 'Challenge not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    progress, created = ChallengeProgress.objects.get_or_create(
+        user=request.user,
+        challenge=challenge,
+        defaults={'score': challenge.points, 'completed_at': timezone.now()}
+    )
+    
+    if not created and not progress.completed_at:
+        progress.score = challenge.points
+        progress.completed_at = timezone.now()
+        progress.save()
+    
+    serializer = ChallengeProgressSerializer(progress)
     return Response(serializer.data)
