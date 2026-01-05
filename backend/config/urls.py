@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from wagtail.core import urls as wagtailcore_urls
 from apps.contentmanagement import urls as content_urls
 from apps.usermanagement import urls as user_urls
 from apps.analyticsmanagement import urls as analytics_urls
@@ -28,12 +29,8 @@ urlpatterns = [
     # Custom dashboard at /dashboard/
     path('dashboard/', custom_dashboard, name='custom_dashboard'),
     
-    # Wagtail admin - mapping custom dashboard to home while preserving other admin URLs
-    path('cms/', include([
-        path('', custom_dashboard, name='wagtailadmin_home'),
-        path('dashboard/', custom_dashboard, name='wagtailadmin_dashboard'),
-        path('', include(wagtailadmin_urls)),
-    ])),
+    # Wagtail CMS admin interface
+    path('cms/', include(wagtailadmin_urls)),
     
     # Document management
     path('documents/', include(wagtaildocs_urls)),
@@ -47,9 +44,21 @@ urlpatterns = [
     # Content management
     path('content/', include(content_urls)),
     
-    # Wagtail frontend (for public-facing pages)
-    path('', include(wagtail_urls)),
-]
+    ]
+
+# Only include the main Wagtail frontend URLs if needed for public-facing pages
+# This avoids conflicts with the admin authentication
+if getattr(settings, 'ENABLE_WAGTAIL_FRONTEND', False):
+    urlpatterns += [
+        # Include Wagtail frontend URLs at the end to avoid conflicts
+        path('', include(wagtail_urls)),
+    ]
+else:
+    # Add a default homepage if not using Wagtail frontend
+    from django.views.generic.base import RedirectView
+    urlpatterns += [
+        path('', RedirectView.as_view(url='/cms/', permanent=True), name='home'),
+    ]
 
 # Serve static and media files in development
 if settings.DEBUG:

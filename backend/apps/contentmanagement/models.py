@@ -4,7 +4,11 @@ from django.utils import timezone
 from django.core.validators import MaxLengthValidator
 import uuid
 from django.contrib.postgres.fields import ArrayField
-
+from wagtail.models import Page
+from wagtail.fields import RichTextField
+from wagtail.admin.panels import FieldPanel
+from wagtail.images import get_image_model
+from wagtail.documents import get_document_model
 
 
 class BaseEntity(models.Model):
@@ -244,3 +248,114 @@ class ChatSession(BaseEntity):
 
     class Meta:
         db_table = 'chat_session'
+
+
+# Wagtail models for media content management
+class HomePage(Page):
+    """
+    Custom homepage that manages media content instead of webpages
+    """
+    intro = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Introductory text for the homepage"
+    )
+    
+    body = RichTextField(
+        blank=True,
+        help_text="Main content for the homepage"
+    )
+    
+    content_panels = Page.content_panels + [
+        FieldPanel('intro'),
+        FieldPanel('body'),
+    ]
+    
+    # Explicitly set the page to be a singleton
+    max_count = 1
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        # Get all media content for display
+        from .models import MediaLibrary
+        context['media_library'] = MediaLibrary.objects.all().order_by('-created_at')
+        return context
+
+
+class MediaPage(Page):
+    """
+    A page for displaying and managing media content
+    """
+    description = RichTextField(
+        blank=True,
+        help_text="Description of the media content"
+    )
+    
+    media_type = models.CharField(
+        max_length=20,
+        choices=ContentTypeEnum.choices,
+        help_text="Type of media content"
+    )
+    
+    # Fields for different media types
+    video_file = models.FileField(
+        upload_to='videos/',
+        blank=True,
+        null=True,
+        help_text="Upload video file if media type is video"
+    )
+    
+    audio_file = models.FileField(
+        upload_to='audio/',
+        blank=True,
+        null=True,
+        help_text="Upload audio file if media type is music"
+    )
+    
+    image = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text="Select an image if media type is image"
+    )
+    
+    document = models.ForeignKey(
+        'wagtaildocs.Document',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text="Select a document if applicable"
+    )
+    
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Author of the media content"
+    )
+    
+    category = models.ForeignKey(
+        ContentCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Category for the media content"
+    )
+    
+    content_panels = Page.content_panels + [
+        FieldPanel('description'),
+        FieldPanel('media_type'),
+        FieldPanel('video_file'),
+        FieldPanel('audio_file'),
+        FieldPanel('image'),
+        FieldPanel('document'),
+        FieldPanel('author'),
+        FieldPanel('category'),
+    ]
+    
+    def __str__(self):
+        return f"Media: {self.title}"

@@ -24,5 +24,9 @@ python manage.py collectstatic --noinput --clear
 echo "Creating content roles..."
 python manage.py create_content_roles
 
+# Initialize CMS with default roles and superuser
+echo "Initializing CMS with default roles and superuser..."
+python manage.py initialize_cms
+
 echo "Starting Gunicorn..."
 exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3

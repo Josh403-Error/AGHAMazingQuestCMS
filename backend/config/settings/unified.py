@@ -19,6 +19,9 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
 # Allow connections from any host
 ALLOWED_HOSTS = ["*"]
 
+# Enable Wagtail frontend (set to False to avoid conflicts with admin auth)
+ENABLE_WAGTAIL_FRONTEND = os.environ.get("ENABLE_WAGTAIL_FRONTEND", "False").lower() == "true"
+
 # CSRF trusted origins for handling requests from nginx proxy
 _raw_csrf_trusted = os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
@@ -69,11 +72,15 @@ INSTALLED_APPS = [
     'apps.contentmanagement',
     'apps.usermanagement',
     'apps.analyticsmanagement',
+    'apps.api',  # API app
 ]
+
+# Conditionally add debug toolbar when DEBUG is True
+if os.environ.get("DJANGO_DEBUG", "False").lower() == "true":
+    INSTALLED_APPS += ['debug_toolbar']
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,6 +92,11 @@ MIDDLEWARE = [
     # API Key authentication and rate limiting middleware
     'apps.api.middleware.APIKeyAuthMiddleware',
 ]
+
+# Conditionally add debug toolbar when DEBUG is True
+if os.environ.get("DJANGO_DEBUG", "False").lower() == "true":
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE.insert(1, 'debug_toolbar.middleware.DebugToolbarMiddleware')  # Insert after CORS middleware
 
 ROOT_URLCONF = 'config.urls'
 
@@ -106,29 +118,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database configuration
-default_db = 'postgresql'
-DB_ENGINE = os.environ.get('DB_ENGINE', default_db).lower()
-
-if DB_ENGINE in ('postgres', 'postgresql'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'agha_db'),
-            'USER': os.environ.get('DB_USER', 'admin'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
-            'HOST': os.environ.get('DB_HOST', 'db'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
-        }
+# Database configuration - using environment variables from docker-compose
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', 'agha_db'),
+        'USER': os.environ.get('DB_USER', 'admin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'changeme'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
-else:
-    # Fallback to SQLite for development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -193,10 +193,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "http://127.0.0.0:8080",
+    "http://0.0.0.0:8080",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Set to True only for development
+CORS_ALLOWED_CREDENTIALS = True
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

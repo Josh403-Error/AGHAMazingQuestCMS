@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+# Use unified settings which are properly configured for the CMS
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.unified')
 
 application = get_wsgi_application()
