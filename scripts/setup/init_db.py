@@ -4,10 +4,8 @@ import django
 from django.conf import settings
 
 # Setup Django
-sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
-os.environ.setdefault('DJANGO_SECRET_KEY', 'my-secret-key')
-os.environ.setdefault('DJANGO_DEBUG', 'True')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.unified')
 
 django.setup()
 

@@ -11,11 +11,11 @@ import django
 from django.conf import settings
 from django.db import transaction
 
-# Add the backend directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+# Add the project root to the Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-# Set up Django settings
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
+# Setup Django with unified settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.unified')
 django.setup()
 
 from django.contrib.auth import get_user_model

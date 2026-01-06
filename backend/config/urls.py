@@ -9,7 +9,6 @@ from django.views.generic import TemplateView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from wagtail.core import urls as wagtailcore_urls
 from apps.contentmanagement import urls as content_urls
 from apps.usermanagement import urls as user_urls
 from apps.analyticsmanagement import urls as analytics_urls

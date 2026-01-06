@@ -153,3 +153,5 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS("\n✓ All API tests completed successfully!")
         )
+# This file has been removed as it's a test command not needed in production
+# The functionality should be part of proper unit tests instead

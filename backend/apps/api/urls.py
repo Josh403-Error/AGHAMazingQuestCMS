@@ -29,7 +29,7 @@ urlpatterns = [
     path('categories/', views.ContentCategoryListView.as_view(), name='category-list'),
     
     # Mobile media content endpoints
-    path('mobile-media/', views.MobileMediaContentViewSet.as_view({'get': 'list', 'post': 'create'}), name='mobile-media-list'),
+    path('mobile-media/', views.MobileMediaContentViewSet.as_view(), name='mobile-media-list'),
     path('mobile-media/<uuid:pk>/', views.MobileMediaContentDetailView.as_view(), name='mobile-media-detail'),
     
     # API Integration endpoints

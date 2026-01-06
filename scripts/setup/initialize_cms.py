@@ -15,12 +15,18 @@ from django.core.management import execute_from_command_line
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 
-# Setup Django - change to backend directory
-backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
-sys.path.insert(0, backend_dir)
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
-# Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
+# Setup Django with unified settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.unified')
+
+# Set default environment variables for production
+os.environ.setdefault('ADMIN_EMAIL', 'admin@example.com')
+os.environ.setdefault('ADMIN_PASSWORD', 'admin123')
+
 django.setup()
 
 def main():

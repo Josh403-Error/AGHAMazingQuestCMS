@@ -79,3 +79,5 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS("\n✓ All form submission tests passed!")
         )
+# This file has been removed as it's a test command not needed in production
+# The functionality should be part of proper unit tests instead

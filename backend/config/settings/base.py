@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Read sensitive settings from environment for safety. These defaults are
-# only suitable for local development; replace them in production.
+# only suitable for local development; replace them in your project settings.
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-8i)k0@hetowp(8-+g6e222ejlkvdr44#8*7dg)f0m10m4*e63l",
@@ -82,68 +82,49 @@ _raw_csrf_trusted = os.environ.get(
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _raw_csrf_trusted.split(",") if origin.strip()]
 
 # Application definition
-
 INSTALLED_APPS = [
     # Django core apps
     'django.contrib.admin',
-    'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'django.contrib.humanize',
+    
     # PostgreSQL extensions
     'django.contrib.postgres',
-
+    
     # Wagtail CMS
-    'wagtail.contrib.forms',
-    'wagtail.contrib.redirects',
-    'wagtail.embeds',
-    'wagtail.sites',
-    'wagtail.users',
-    'wagtail.snippets',
-    'wagtail.documents',
-    'wagtail.images',
-    'wagtail.search',
-    'wagtail.admin',
     'wagtail',
-
+    'wagtail.documents',
+    'wagtail.snippets',
+    'wagtail.users',
+    'wagtail.images',
+    'wagtail.embeds',
+    'wagtail.search',
+    'wagtail.contrib.redirects',
+    'wagtail.contrib.forms',
+    'wagtail.contrib.sitemaps',
+    'wagtail.sites',
+    'wagtail.api.v2',
+    
     # Wagtail dependencies
-    'modelcluster',
     'taggit',
-
-    # REST Framework
+    'modelcluster',
+    
+    # REST Framework and related
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
-    'rest_framework.authtoken',
-
-    # Django extensions for development
-    'django_extensions',
-
-    # Your apps
-    'apps.authentication',
-    'apps.contentmanagement',
-    'apps.usermanagement',
-    'apps.analyticsmanagement',
-    'apps.api',  # Unified API app
-    'apps.branding',  # Branding customization app
 ]
 
-# Conditionally add debug toolbar when DEBUG is True
-if DEBUG:
-    INSTALLED_APPS += ['debug_toolbar']
-
 MIDDLEWARE = [
-    # CORS middleware should be placed as high as possible
     'corsheaders.middleware.CorsMiddleware',
-    # Debug toolbar middleware should be placed early for full coverage
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # Wagtail redirects middleware should be after CommonMiddleware
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -171,56 +152,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-
-# Database
-# Support switching between sqlite, MySQL and PostgreSQL via environment variables.
-# DB_ENGINE: 'sqlite' | 'mysql' (default when DEBUG is False) | 'postgres'/'postgresql'
-# For local development (DEBUG=True) default to sqlite to avoid requiring a DB server.
-default_db = 'sqlite' if DEBUG else 'postgres'
-DB_ENGINE = os.environ.get('DB_ENGINE', default_db).lower()
-if DB_ENGINE == 'sqlite':
-    engine = 'django.db.backends.sqlite3'
-    DATABASES = {
-        'default': {
-            'ENGINE': engine,
-            'NAME': os.environ.get('DB_NAME', str(BASE_DIR / 'db.sqlite3')),
-        }
+# Database configuration - using environment variables from docker-compose
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', 'agha_db'),
+        'USER': os.environ.get('DB_USER', 'admin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'changeme'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
-else:
-    if DB_ENGINE in ('mysql', 'mariadb'):
-        try:
-            import pymysql
-
-            pymysql.install_as_MySQLdb()
-        except Exception:
-            # If PyMySQL is not available, let Django raise an import error later
-            pass
-        engine = 'django.db.backends.mysql'
-    elif DB_ENGINE in ('postgres', 'postgresql'):
-        engine = 'django.db.backends.postgresql'
-    else:
-        engine = DB_ENGINE
-
-    DATABASES = {
-        'default': {
-            'ENGINE': engine,
-            'NAME': os.environ.get('DB_NAME', 'agha_db'),
-            'USER': os.environ.get('DB_USER', 'admin'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'admin'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '3306' if engine.endswith('mysql') else '5432'),
-            'OPTIONS': {
-                # MySQL strict mode is recommended; leave empty for PostgreSQL
-                **({'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"} if engine.endswith('mysql') else {}),
-            },
-        }
-    }
-
+}
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -236,142 +180,46 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
-# Where `collectstatic` will gather files for production
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-# Additional locations Django will search for static files in development
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files uploaded by users
+# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Custom user model
-AUTH_USER_MODEL = 'usermanagement.User'
-
-# Sites framework (required by Wagtail)
-SITE_ID = int(os.environ.get('DJANGO_SITE_ID', 1))
-
-# Base URL for Wagtail admin (used in notifications and user bar links)
-WAGTAILADMIN_BASE_URL = os.environ.get('WAGTAILADMIN_BASE_URL', 'http://localhost:8000')
-
-# CORS (for React frontend running on localhost:3000)
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-]
-CORS_ALLOW_CREDENTIALS = True
-
-# Django REST Framework + Simple JWT configuration
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
-}
-
-# CSRF trusted origins allow safe cross-origin POST requests without failing CSRF validation.
-# Default to common local development origins. Override via environment variable in production.
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',  # Common React development port
-    'http://localhost:3001',  # Alternative local development port
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://localhost:8080',  # Nginx proxy port
-    'http://localhost:8000',  # Direct Django access
-    'http://hosting-pc.tail013787.ts.net:8080',  # Hostname from nginx config
-]
-_raw_csrf_trusted = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
-if _raw_csrf_trusted:
-    CSRF_TRUSTED_ORIGINS += [origin.strip() for origin in _raw_csrf_trusted.split(',') if origin.strip()]
-
-# Simple JWT defaults: short access token, longer refresh token
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
-}
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = 'AGHAMazing Quest CMS'
 WAGTAILADMIN_BASE_URL = os.environ.get('WAGTAILADMIN_BASE_URL', 'http://localhost:8080')
 
-# ---------- Security / production defaults
-# When DEBUG is False, pick sensible secure defaults from environment variables.
-# These defaults help pass `manage.py check --deploy` and are safe to override
-# per-deployment via environment variables.
-if not DEBUG:
-    # Force SSL redirect in production unless explicitly disabled
-    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True') == 'True'
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
-    # HSTS: one year by default. When testing set to a small value first.
-    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', '31536000'))
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True') == 'True'
-    SECURE_HSTS_PRELOAD = os.environ.get('DJANGO_SECURE_HSTS_PRELOAD', 'False') == 'True'
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.0:8080",
+    "http://0.0.0.0:8080",
+]
 
-    # Cookies: mark secure so browsers only send them over HTTPS
-    SESSION_COOKIE_SECURE = os.environ.get('DJANGO_SESSION_COOKIE_SECURE', 'True') == 'True'
-    CSRF_COOKIE_SECURE = os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'True') == 'True'
-
-    # SECRET_KEY should be set externally in production and be long/random.
-    if not SECRET_KEY or SECRET_KEY.startswith('django-insecure-'):
-        # Do not silently accept insecure keys in production — raise to fail fast
-        raise RuntimeError('Insecure SECRET_KEY in production. Set DJANGO_SECRET_KEY environment variable to a secure value.')
-
-    # If running behind a proxy/load-balancer that terminates SSL, set this header
-    # Example: SECURE_PROXY_SSL_HEADER='HTTP_X_FORWARDED_PROTO,https'
-    _proxy = os.environ.get('DJANGO_SECURE_PROXY_SSL_HEADER')
-    if _proxy:
-        try:
-            header_name, header_value = _proxy.split(',', 1)
-            SECURE_PROXY_SSL_HEADER = (header_name.strip(), header_value.strip())
-        except Exception:
-            # ignore malformed setting and proceed without proxy header
-            pass
-
-    # Ensure DEBUG is False in production
-    # Only force DEBUG to False if we're not in debug mode already
-    if os.environ.get('DJANGO_DEBUG', 'False').lower() != 'true':
-        DEBUG = False
-
-# Debug toolbar configuration
-if DEBUG:
-    # Required for Django Debug Toolbar to work properly
-    INTERNAL_IPS = [
-        '127.0.0.1',
-        'localhost',
-    ]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Set to True only for development

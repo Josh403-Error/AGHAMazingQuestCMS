@@ -18,10 +18,15 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY backend /app/
 
-# Entrypoint
-COPY deployment/docker/entrypoint.sh /app/docker-entrypoint.sh
+# Copy and setup entrypoint script with proper line endings
+COPY --chmod=755 deployment/docker/entrypoint.sh /app/docker-entrypoint.sh
+
+# Alternative: Create a simple command to run the Django setup and Gunicorn directly
 RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health/ || exit 1
 
 CMD ["/app/docker-entrypoint.sh"]

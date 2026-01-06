@@ -75,10 +75,6 @@ INSTALLED_APPS = [
     'apps.api',  # API app
 ]
 
-# Conditionally add debug toolbar when DEBUG is True
-if os.environ.get("DJANGO_DEBUG", "False").lower() == "true":
-    INSTALLED_APPS += ['debug_toolbar']
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
